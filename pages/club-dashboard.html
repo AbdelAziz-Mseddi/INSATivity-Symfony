@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../styles/layout.css" />
     <link rel="stylesheet" href="../styles/page.css" />
     <link rel="stylesheet" href="../styles/club-dashboard.css" />
-    <script src="../scripts/club-dashboard.js" defer></script>
+    <script type="module" src="../scripts/club-dashboard.js"></script>
   </head>
   <body>
     <header class="main-header">
@@ -58,32 +58,25 @@
         <section class="club-home">
           <div class="club-banner" aria-label="Club banner"></div>
           <div class="club-home-header">
-            <div class="club-logo" aria-hidden="true">CU</div>
+            <div class="club-logo" aria-hidden="true">CL</div>
             <div class="club-home-title">
-              <h1 class="club-name">Cultural Union</h1>
+              <h1 class="club-name">Loading club...</h1>
               <div class="club-tags" aria-label="Club tags">
-                <span class="club-tag">Cultural</span>
-                <span class="club-tag">Art</span>
-                <span class="club-tag">Community</span>
+                <span class="club-tag">Loading</span>
               </div>
             </div>
           </div>
 
-          <p class="club-description">
-            The Cultural Union celebrates diversity on campus through workshops,
-            showcases, and collaborations with local communities. We host weekly
-            gatherings, language exchanges, and seasonal festivals that bring
-            students together across disciplines.
-          </p>
+          <p class="club-description">Loading club description...</p>
 
           <div class="club-meta-grid">
             <div class="club-meta-card">
-              <div class="club-meta-label">Members</div>
-              <div class="club-meta-value">148</div>
+              <div class="club-meta-label">Participants</div>
+              <div class="club-meta-value">--</div>
             </div>
             <div class="club-meta-card">
-              <div class="club-meta-label">Premises</div>
-              <div class="club-meta-value">Student Center, Room B204</div>
+              <div class="club-meta-label">Main Venue</div>
+              <div class="club-meta-value">--</div>
             </div>
           </div>
         </section>
@@ -94,94 +87,13 @@
             <div>
               <h2 class="pending-title">Pending Events</h2>
               <p class="pending-subtitle">
-                These events are waiting for administrator approval.
+                Upcoming events for the selected club.
               </p>
             </div>
-            <span class="pending-status">3 awaiting review</span>
+            <span class="pending-status">-- awaiting review</span>
           </div>
 
-          <div class="pending-list">
-            <article class="pending-card">
-              <div
-                class="pending-cover"
-                data-theme="night"
-                aria-label="Culture Night cover"
-              >
-                <span class="pending-cover-label">Cover photo</span>
-              </div>
-              <div class="pending-body">
-                <div class="pending-meta">
-                  <span class="pending-badge">Awaiting approval</span>
-                  <span class="pending-date">In 5 days</span>
-                </div>
-                <h3 class="pending-name">Culture Night</h3>
-                <div class="pending-tags">
-                  <span class="club-tag">Cultural</span>
-                  <span class="club-tag">Festival</span>
-                  <span class="club-tag">Music</span>
-                </div>
-                <p class="pending-description">
-                  An evening showcase of student performances, regional food
-                  stalls, and storytelling. Includes a short welcome from the
-                  club board and guest artists from the community.
-                </p>
-              </div>
-            </article>
-
-            <article class="pending-card">
-              <div
-                class="pending-cover"
-                data-theme="art"
-                aria-label="Global Art Workshop cover"
-              >
-                <span class="pending-cover-label">Cover photo</span>
-              </div>
-              <div class="pending-body">
-                <div class="pending-meta">
-                  <span class="pending-badge">Awaiting approval</span>
-                  <span class="pending-date">In 8 days</span>
-                </div>
-                <h3 class="pending-name">Global Art Workshop</h3>
-                <div class="pending-tags">
-                  <span class="club-tag">Art</span>
-                  <span class="club-tag">Workshop</span>
-                  <span class="club-tag">Hands-on</span>
-                </div>
-                <p class="pending-description">
-                  A hands-on workshop featuring printmaking, collage, and
-                  textile crafts inspired by global traditions. Materials are
-                  provided for the first 60 attendees.
-                </p>
-              </div>
-            </article>
-
-            <article class="pending-card">
-              <div
-                class="pending-cover"
-                data-theme="story"
-                aria-label="Community Story Circle cover"
-              >
-                <span class="pending-cover-label">Cover photo</span>
-              </div>
-              <div class="pending-body">
-                <div class="pending-meta">
-                  <span class="pending-badge">Awaiting approval</span>
-                  <span class="pending-date">In 12 days</span>
-                </div>
-                <h3 class="pending-name">Community Story Circle</h3>
-                <div class="pending-tags">
-                  <span class="club-tag">Community</span>
-                  <span class="club-tag">Dialogue</span>
-                  <span class="club-tag">Campus</span>
-                </div>
-                <p class="pending-description">
-                  A moderated dialogue circle focused on cultural identity and
-                  belonging. Students can share short stories in a relaxed,
-                  supportive environment.
-                </p>
-              </div>
-            </article>
-          </div>
+          <div class="pending-list"></div>
         </section>
       </div>
       <div class="panel" data-panel="create">
@@ -336,9 +248,7 @@
                 required
                 aria-label="Choose a past event"
               >
-                <option value="">Choose an event…</option>
-                <option value="culture-night">Culture Night</option>
-                <option value="global-art-workshop">Global Art Workshop</option>
+                <option value="">Choose an event...</option>
               </select>
             </div>
 
@@ -400,108 +310,7 @@
             </div>
           </div>
 
-          <div class="history-list">
-            <article class="history-card">
-              <div
-                class="history-cover"
-                data-theme="night"
-                aria-label="Culture Night cover"
-              >
-                <span class="history-cover-label">Past event</span>
-              </div>
-              <div class="history-body">
-                <div class="history-meta">
-                  <span class="history-badge">Archived</span>
-                  <span class="history-date">Ended 2 weeks ago</span>
-                </div>
-                <h3 class="history-name">Culture Night</h3>
-                <div class="history-tags">
-                  <span class="club-tag">Cultural</span>
-                  <span class="club-tag">Festival</span>
-                  <span class="club-tag">Music</span>
-                </div>
-                <p class="history-description">
-                  An evening showcase of student performances, regional food
-                  stalls, and storytelling.
-                </p>
-                <div class="history-stats">
-                  <div class="history-stat">
-                    <span class="history-stat-label">Club rating</span>
-                    <span class="history-stat-value history-rating"
-                      >4.5 / 5</span
-                    >
-                  </div>
-                  <div class="history-stat">
-                    <span class="history-stat-label">Students' rating</span>
-                    <span
-                      class="history-stat-value history-rating history-rating-students"
-                      >4.2 / 5</span
-                    >
-                  </div>
-                  <div class="history-stat">
-                    <span class="history-stat-label">Attended</span>
-                    <span class="history-stat-value">98 people</span>
-                  </div>
-                </div>
-                <div class="history-media">
-                  <span class="history-media-label">Event media</span>
-                  <div class="history-media-thumbs">
-                    <div class="history-media-thumb" aria-label="Photo 1"></div>
-                    <div class="history-media-thumb" aria-label="Photo 2"></div>
-                    <div class="history-media-thumb" aria-label="Photo 3"></div>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="history-card">
-              <div
-                class="history-cover"
-                data-theme="art"
-                aria-label="Global Art Workshop cover"
-              >
-                <span class="history-cover-label">Past event</span>
-              </div>
-              <div class="history-body">
-                <div class="history-meta">
-                  <span class="history-badge">Archived</span>
-                  <span class="history-date">Ended 1 month ago</span>
-                </div>
-                <h3 class="history-name">Global Art Workshop</h3>
-                <div class="history-tags">
-                  <span class="club-tag">Art</span>
-                  <span class="club-tag">Workshop</span>
-                </div>
-                <p class="history-description">
-                  A hands-on workshop featuring printmaking, collage, and
-                  textile crafts.
-                </p>
-                <div class="history-stats">
-                  <div class="history-stat">
-                    <span class="history-stat-label">Club rating</span>
-                    <span class="history-stat-value history-rating">5 / 5</span>
-                  </div>
-                  <div class="history-stat">
-                    <span class="history-stat-label">Students' rating</span>
-                    <span
-                      class="history-stat-value history-rating history-rating-students"
-                      >4.8 / 5</span
-                    >
-                  </div>
-                  <div class="history-stat">
-                    <span class="history-stat-label">Attended</span>
-                    <span class="history-stat-value">52 people</span>
-                  </div>
-                </div>
-                <div class="history-media">
-                  <span class="history-media-label">Event media</span>
-                  <div class="history-media-thumbs">
-                    <div class="history-media-thumb" aria-label="Photo 1"></div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          </div>
+          <div class="history-list"></div>
         </section>
       </div>
       <div class="panel" data-panel="done">
@@ -514,183 +323,10 @@
                 then move to history.
               </p>
             </div>
-            <span class="done-status">2 awaiting review</span>
+            <span class="done-status">-- awaiting review</span>
           </div>
 
-          <div class="done-list">
-            <article class="done-card">
-              <div class="done-event">
-                <div
-                  class="done-cover"
-                  data-theme="story"
-                  aria-label="Community Story Circle cover"
-                >
-                  <span class="done-cover-label">Ended</span>
-                </div>
-                <div class="done-event-body">
-                  <div class="done-meta">
-                    <span class="done-badge">Needs review</span>
-                    <span class="done-date">Ended 3 days ago</span>
-                  </div>
-                  <h3 class="done-name">Community Story Circle</h3>
-                  <div class="done-tags">
-                    <span class="club-tag">Community</span>
-                    <span class="club-tag">Dialogue</span>
-                  </div>
-                  <p class="done-description">
-                    A moderated dialogue circle focused on cultural identity and
-                    belonging.
-                  </p>
-                </div>
-              </div>
-              <div class="done-review">
-                <h4 class="done-review-title">Complete event review</h4>
-                <form class="done-review-form">
-                  <div class="done-form-row">
-                    <div class="form-field">
-                      <label class="form-label" for="done-rating-1"
-                        >How well did it go? (0–5)</label
-                      >
-                      <input
-                        class="form-input"
-                        id="done-rating-1"
-                        name="done-rating"
-                        type="number"
-                        min="0"
-                        max="5"
-                        step="0.5"
-                        placeholder="0–5"
-                        required
-                        aria-label="Rate from 0 to 5"
-                      />
-                    </div>
-                    <div class="form-field">
-                      <label class="form-label" for="done-attendance-1"
-                        >Number attended</label
-                      >
-                      <input
-                        class="form-input"
-                        id="done-attendance-1"
-                        name="done-attendance"
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 45"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="form-field form-field-wide">
-                    <label class="form-label" for="done-media-1"
-                      >Attach event media (photos / videos)</label
-                    >
-                    <div class="form-file">
-                      <input
-                        class="form-input form-file-input"
-                        id="done-media-1"
-                        name="done-media"
-                        type="file"
-                        accept="image/*,video/*"
-                        multiple
-                      />
-                      <span class="form-file-hint"
-                        >Images or videos from the event. Multiple files
-                        allowed.</span
-                      >
-                    </div>
-                  </div>
-                  <button class="btn btn-gold done-submit" type="submit">
-                    Move to history
-                  </button>
-                </form>
-              </div>
-            </article>
-
-            <article class="done-card">
-              <div class="done-event">
-                <div
-                  class="done-cover"
-                  data-theme="night"
-                  aria-label="Open Mic Night cover"
-                >
-                  <span class="done-cover-label">Ended</span>
-                </div>
-                <div class="done-event-body">
-                  <div class="done-meta">
-                    <span class="done-badge">Needs review</span>
-                    <span class="done-date">Ended 1 week ago</span>
-                  </div>
-                  <h3 class="done-name">Open Mic Night</h3>
-                  <div class="done-tags">
-                    <span class="club-tag">Music</span>
-                    <span class="club-tag">Performance</span>
-                  </div>
-                  <p class="done-description">
-                    An open stage for music, poetry, and short performances.
-                  </p>
-                </div>
-              </div>
-              <div class="done-review">
-                <h4 class="done-review-title">Complete event review</h4>
-                <form class="done-review-form">
-                  <div class="done-form-row">
-                    <div class="form-field">
-                      <label class="form-label" for="done-rating-2"
-                        >How well did it go? (0–5)</label
-                      >
-                      <input
-                        class="form-input"
-                        id="done-rating-2"
-                        name="done-rating"
-                        type="number"
-                        min="0"
-                        max="5"
-                        step="0.5"
-                        placeholder="0–5"
-                        required
-                        aria-label="Rate from 0 to 5"
-                      />
-                    </div>
-                    <div class="form-field">
-                      <label class="form-label" for="done-attendance-2"
-                        >Number attended</label
-                      >
-                      <input
-                        class="form-input"
-                        id="done-attendance-2"
-                        name="done-attendance"
-                        type="number"
-                        min="0"
-                        placeholder="e.g. 45"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="form-field form-field-wide">
-                    <label class="form-label" for="done-media-2"
-                      >Attach event media (photos / videos)</label
-                    >
-                    <div class="form-file">
-                      <input
-                        class="form-input form-file-input"
-                        id="done-media-2"
-                        name="done-media"
-                        type="file"
-                        accept="image/*,video/*"
-                        multiple
-                      />
-                      <span class="form-file-hint"
-                        >Images or videos from the event. Multiple files
-                        allowed.</span
-                      >
-                    </div>
-                  </div>
-                  <button class="btn btn-gold done-submit" type="submit">
-                    Move to history
-                  </button>
-                </form>
-              </div>
-            </article>
-          </div>
+          <div class="done-list"></div>
         </section>
       </div>
     </div>

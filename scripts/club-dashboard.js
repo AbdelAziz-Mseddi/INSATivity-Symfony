@@ -1,117 +1,111 @@
+import {
+  createEvent,
+  fetchAllEvents,
+  fetchClubById,
+  uploadCoverImage
+} from './club-dashboard/api.js';
+import { DEFAULT_CLUB_ID, EVENT_MANAGER_CLUB_NAME_BY_ID } from './club-dashboard/constants.js';
+import {
+  bindSidebar,
+  getDashboardDom,
+  renderClubProfile,
+  renderDoneEvents,
+  renderFeedbackEventOptions,
+  renderHistoryEvents,
+  renderLoadError,
+  renderPendingEvents,
+  setFormStatus
+} from './club-dashboard/render.js';
+import { getRequestedClubId, normalizeText, splitEventsByDate } from './club-dashboard/utils.js';
+
 document.addEventListener('DOMContentLoaded', () => {
-  const sidebar = document.querySelector('.sidebar');
-  const panels = Array.from(document.querySelectorAll('[data-panel]'));
-  const createForm = document.querySelector('.event-create-form');
-
-  function showPanel(name) {
-    panels.forEach(p => {
-      p.hidden = p.dataset.panel !== name;
-    });
-    
-    sidebar?.querySelectorAll('.sidebar_link').forEach(link => {
-      link.classList.toggle('active', link.dataset.target === name);
-    });
-  }
-
-  sidebar?.addEventListener('click', (e) => {
-    const link = e.target.closest('.sidebar_link');
-    if (!link) return;
-    const target = link.dataset.target;
-    if (!target) return;
-    showPanel(target);
-  });
-
-  function setFormStatus(message, isError = false) {
-    if (!createForm) return;
-
-    let status = createForm.querySelector('.form-status');
-    if (!status) {
-      status = document.createElement('p');
-      status.className = 'form-status';
-      status.style.marginTop = '12px';
-      status.style.fontSize = '14px';
-      createForm.appendChild(status);
-    }
-
-    status.textContent = message;
-    status.style.color = isError ? '#b42318' : '#027a48';
-  }
+  const dom = getDashboardDom();
+  let activeClub = null;
 
   function getClubContext() {
-    const params = new URLSearchParams(window.location.search);
-    const clubId = (params.get('club') || '').trim().toLowerCase();
+    const requestedClubId = getRequestedClubId();
 
-    const clubNameById = {
-      acm: 'ACM',
-      jci: 'JCI',
-      ieee: 'IEEE',
-      cine_radio: 'Cine Radio',
-      securinets: 'Securinets',
-      junior: 'Junior',
-      aerobotix: 'Aerobotix',
-      theatro: 'Theatro',
-      '3zero': '3ZERO',
-      android: 'Android Club',
-      genesis_labs: 'Genesis Labs',
-      insat_press: 'INSAT Press'
-    };
+    if (activeClub?.id && activeClub?.name) {
+      return {
+        clubId: activeClub.id,
+        clubName: EVENT_MANAGER_CLUB_NAME_BY_ID[activeClub.id] || activeClub.name
+      };
+    }
 
-    const resolvedId = clubNameById[clubId] ? clubId : 'acm';
+    const resolvedId = EVENT_MANAGER_CLUB_NAME_BY_ID[requestedClubId]
+      ? requestedClubId
+      : DEFAULT_CLUB_ID;
+
     return {
       clubId: resolvedId,
-      clubName: clubNameById[resolvedId]
+      clubName: EVENT_MANAGER_CLUB_NAME_BY_ID[resolvedId]
     };
   }
 
-  async function uploadCoverImage(file, prefix) {
-    const formData = new FormData();
-    formData.append('file', file);
+  function getClubEvents(allEvents, club) {
+    const normalizedClubName = normalizeText(club.name);
+    const normalizedManagerName = normalizeText(EVENT_MANAGER_CLUB_NAME_BY_ID[club.id]);
+    const imageToken = `/assets/images/${club.id}/`;
 
-    const response = await fetch(`../backend/media.php?action=upload&prefix=${encodeURIComponent(prefix)}`, {
-      method: 'POST',
-      body: formData
+    return allEvents.filter(event => {
+      const eventClubName = normalizeText(event.club);
+      const clubLogoPath = String(event.clubLogo || '');
+
+      return (
+        eventClubName === normalizedClubName ||
+        eventClubName === normalizedManagerName ||
+        clubLogoPath.includes(imageToken)
+      );
     });
-
-    const result = await response.json();
-    if (!response.ok || result.status !== 'success') {
-      throw new Error((result.errors && result.errors[0]) || 'Failed to upload image');
-    }
-
-    return result.data.path;
   }
 
-  async function createEvent(payload) {
-    const response = await fetch('../backend/events.php?action=create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+  function applyClubDashboardContent(club, events) {
+    const { upcomingEvents, finishedEvents } = splitEventsByDate(events);
 
-    const result = await response.json();
-    if (!response.ok || result.status !== 'success') {
-      throw new Error((result.errors && result.errors[0]) || 'Failed to create event');
-    }
-
-    return result.data;
+    renderClubProfile(dom, club, events);
+    renderPendingEvents(dom, club, upcomingEvents);
+    renderHistoryEvents(dom, club, finishedEvents);
+    renderDoneEvents(dom, club, finishedEvents);
+    renderFeedbackEventOptions(dom, finishedEvents);
   }
 
-  createForm?.addEventListener('submit', async (e) => {
-    // prevent page reload when form is submitted
-    e.preventDefault();
+  async function loadDashboardData() {
+    const requestedClubId = getRequestedClubId() || DEFAULT_CLUB_ID;
 
-    const submitButton = createForm.querySelector('.event-create-submit');
+    try {
+      let club;
+      try {
+        club = await fetchClubById(requestedClubId);
+      } catch {
+        // Fallback to default club when an unknown club id is provided in URL.
+        club = await fetchClubById(DEFAULT_CLUB_ID);
+      }
+
+      const allEvents = await fetchAllEvents();
+      const clubEvents = getClubEvents(allEvents, club);
+
+      activeClub = club;
+      applyClubDashboardContent(club, clubEvents);
+    } catch (error) {
+      renderLoadError(dom, error.message);
+    }
+  }
+
+  dom.createForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const submitButton = dom.createForm.querySelector('.event-create-submit');
     const originalButtonText = submitButton?.textContent || 'Suggest Event';
 
     try {
-      setFormStatus('Submitting event...');
+      setFormStatus(dom, 'Submitting event...');
+
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = 'Submitting...';
       }
 
-      const formData = new FormData(createForm);
+      const formData = new FormData(dom.createForm);
       const file = formData.get('event-cover');
       if (!(file instanceof File) || !file.size) {
         throw new Error('Please choose a cover image.');
@@ -143,10 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       await createEvent(eventPayload);
-      createForm.reset();
-      setFormStatus('Event created successfully and linked to backend.');
+      dom.createForm.reset();
+      setFormStatus(dom, 'Event created successfully and linked to backend.');
+      await loadDashboardData();
     } catch (error) {
-      setFormStatus(error.message || 'Something went wrong while creating the event.', true);
+      setFormStatus(dom, error.message || 'Something went wrong while creating the event.', true);
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
@@ -155,6 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const first = sidebar?.querySelector('.sidebar_link[data-target]');
-  if (first?.dataset.target) showPanel(first.dataset.target);
+  bindSidebar(dom);
+  loadDashboardData();
 });
