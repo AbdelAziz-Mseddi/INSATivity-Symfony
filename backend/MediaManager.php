@@ -28,7 +28,7 @@ class MediaManager {
         }
 
         $ext = $this->allowedTypes[$mime];
-        $name = ($prefix ? $prefix . '_' : '') . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $name = ($prefix ? $prefix . '_' : '') . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext; # we could also use uniqid() here instead of 'bin2hex(random_bytes(4))'
         $path = $this->uploadsDir . $name;
 
         if (!move_uploaded_file($file['tmp_name'], $path)) {
@@ -39,6 +39,7 @@ class MediaManager {
     }
 
     public function delete($filePath) {
+        # block malicious users who want to delete sensitive files (like system files, configuration...)
         $filePath = str_replace(['..', '\\'], ['', '/'], $filePath);
         $fullPath = __DIR__ . '/../' . $filePath;
 
