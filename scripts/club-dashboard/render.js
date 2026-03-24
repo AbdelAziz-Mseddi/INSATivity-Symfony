@@ -4,7 +4,7 @@ import {
   getEventTheme,
   getRelativeDateLabel
 } from './utils.js';
-
+// njibou l elements necessaires li bech n manipuliwhom
 export function getDashboardDom() {
   return {
     sidebar: document.querySelector('.sidebar'),
@@ -28,30 +28,34 @@ export function getDashboardDom() {
     feedbackSelect: document.getElementById('feedback-event')
   };
 }
-
+// nkhabiw l panels li ma hajetnech bihom w n7otou l panel li hajetna biha (name)
 export function showPanel(dom, name) {
   dom.panels.forEach(panel => {
     panel.hidden = panel.dataset.panel !== name;
   });
-
+  // tabdil alwen l links
   dom.sidebar?.querySelectorAll('.sidebar_link').forEach(link => {
     link.classList.toggle('active', link.dataset.target === name);
   });
 }
-
+// ena nestaamel li fou9i 
 export function bindSidebar(dom) {
+  // closest tetla3 fel tree mte3 l dom w trajaalek soit awel element hajtek bih soit null
+  // a9al memory men eventListener fi kol link + cleaner
   dom.sidebar?.addEventListener('click', event => {
     const link = event.target.closest('.sidebar_link');
     if (!link?.dataset.target) return;
     showPanel(dom, link.dataset.target);
   });
-
+  // ndhahrou awel panel tji 9odemna initialement (houni hiya l profile)
+  // bech l user ma ychoufech page bidha
+  // depth-first search default for all CSS selectors in JavaScript: querySelector, querySelectorAll, getElementsBy*, etc.
   const first = dom.sidebar?.querySelector('.sidebar_link[data-target]');
   if (first?.dataset.target) {
     showPanel(dom, first.dataset.target);
   }
 }
-
+// naamlou "resultat" lel form submission kenha mouch mawjouda, snn nbadlouha
 export function setFormStatus(dom, message, isError = false) {
   if (!dom.createForm) return;
 
@@ -67,32 +71,32 @@ export function setFormStatus(dom, message, isError = false) {
   status.textContent = message;
   status.style.color = isError ? '#b42318' : '#027a48';
 }
-
-function getClubLogoPath(club, events) {
-  const eventWithLogo = events.find(event => event.clubLogo);
-  return eventWithLogo?.clubLogo || `../assets/images/${club.id}/profile.jpg`;
+// njibou l logo mte3 l club
+function getClubLogoPath(club) {
+  return `../assets/images/${club.id}/profile.jpg`;
 }
-
+// naltkhou l panel mte3 l profile
 export function renderClubProfile(dom, club, events) {
+  // nbadlou ism l'onglet hasb l club
   document.title = `INSATivity | ${club.name} Dashboard`;
-
+  // ism l club w description mte3ou ken mawjouda
   if (dom.profileNameEl) dom.profileNameEl.textContent = club.name;
   if (dom.profileDescriptionEl) {
     dom.profileDescriptionEl.textContent = club.description || 'No description available.';
   }
-
+  // l banner mte3 l club
   if (dom.profileBannerEl) {
     dom.profileBannerEl.style.backgroundImage = `linear-gradient(120deg, rgba(43, 62, 78, 0.75), rgba(130, 6, 8, 0.75)), url('${club.banner}')`;
     dom.profileBannerEl.style.backgroundPosition = 'center';
     dom.profileBannerEl.style.backgroundSize = 'cover';
   }
-
+  // logo l club
   if (dom.profileLogoEl) {
-    const logoPath = getClubLogoPath(club, events);
+    const logoPath = getClubLogoPath(club);
     dom.profileLogoEl.innerHTML = `<img src="${logoPath}" alt="${escapeHtml(club.name)} logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"/>`;
     dom.profileLogoEl.setAttribute('aria-hidden', 'false');
   }
-
+  // tags (ism fac, id, category)
   if (dom.profileTagsEl) {
     const tags = [club.category, club.id.toUpperCase(), 'INSAT'];
     dom.profileTagsEl.innerHTML = tags
@@ -100,16 +104,17 @@ export function renderClubProfile(dom, club, events) {
       .map(tag => `<span class="club-tag">${escapeHtml(tag)}</span>`)
       .join('');
   }
-
+  // somme nombre participants fel events + local
   const totalParticipants = events.reduce((sum, event) => sum + Number(event.participants || 0), 0);
   const topLocation = events[0]?.location || 'Various locations';
-
+  // pour le moment l local ghalet taw nsal7ouha
   if (dom.metaLabelEls[0]) dom.metaLabelEls[0].textContent = 'Participants';
   if (dom.metaValueEls[0]) dom.metaValueEls[0].textContent = String(totalParticipants);
   if (dom.metaLabelEls[1]) dom.metaLabelEls[1].textContent = 'Main Venue';
   if (dom.metaValueEls[1]) dom.metaValueEls[1].textContent = topLocation;
 }
-
+// panel l <pending> events (yestanew fel confirmation mel admin)
+// pour le moment l pending wel finished wel history mazel mouch mriguel
 export function renderPendingEvents(dom, club, upcomingEvents) {
   if (dom.pendingTitle) dom.pendingTitle.textContent = `${club.name} Upcoming Events`;
   if (dom.pendingStatus) dom.pendingStatus.textContent = `${upcomingEvents.length} awaiting review`;
@@ -156,7 +161,7 @@ export function renderPendingEvents(dom, club, upcomingEvents) {
     })
     .join('');
 }
-
+// panel l <history> events (finished + rated men admin l club)
 export function renderHistoryEvents(dom, club, finishedEvents) {
   if (dom.historyTitle) dom.historyTitle.textContent = `${club.name} History`;
   if (!dom.historyList) return;
@@ -211,7 +216,7 @@ export function renderHistoryEvents(dom, club, finishedEvents) {
     })
     .join('');
 }
-
+// panel l <done> events (finished + waiting for club admin review)
 export function renderDoneEvents(dom, club, finishedEvents) {
   if (dom.doneTitle) dom.doneTitle.textContent = `${club.name} Done`;
   if (dom.doneStatus) dom.doneStatus.textContent = `${finishedEvents.length} awaiting review`;
@@ -293,7 +298,7 @@ export function renderDoneEvents(dom, club, finishedEvents) {
     })
     .join('');
 }
-
+// rendering l student feedback options hasb l finished events
 export function renderFeedbackEventOptions(dom, finishedEvents) {
   if (!dom.feedbackSelect) return;
 
@@ -308,7 +313,7 @@ export function renderFeedbackEventOptions(dom, finishedEvents) {
 
   dom.feedbackSelect.innerHTML = `${defaultOption}${eventOptions}`;
 }
-
+// au cas ou saret mochkla fel fetch mte3 data
 export function renderLoadError(dom, message) {
   if (dom.profileNameEl) dom.profileNameEl.textContent = 'Club not found';
   if (dom.profileDescriptionEl) {

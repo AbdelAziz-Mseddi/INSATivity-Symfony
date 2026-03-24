@@ -1,3 +1,4 @@
+// club id -> club name dictionnaire
 export const EVENT_MANAGER_CLUB_NAME_BY_ID = {
   acm: 'ACM',
   jci: 'JCI',
@@ -12,5 +13,5 @@ export const EVENT_MANAGER_CLUB_NAME_BY_ID = {
   genesis_labs: 'Genesis Labs',
   insat_press: 'INSAT Press'
 };
-
+// https://music.youtube.com/watch?v=NMRhx71bGo4&si=gpeRxMcl8Xq3rjNn, let it happen
 export const DEFAULT_CLUB_ID = 'cine_radio';
