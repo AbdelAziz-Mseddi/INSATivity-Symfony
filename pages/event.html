@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="../styles/base.css" />
     <link rel="stylesheet" href="../styles/layout.css" />
     <link rel="stylesheet" href="../styles/components.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
   </head>
   <body>
     <header class="main-header">
@@ -28,24 +32,41 @@
     <div class="image_side" id="eventImage"></div>
     <div class="content_side">
       <section class="left">
-        <header>
-          <h1 id="eventTitle">NAME OF THE EVENT</h1>
-          <p id="eventClub">name of the club</p>
-        </header>
-        <p><strong>📅 Date :</strong> <span id="eventDate">date</span></p>
-        <p><strong>⏰Heure :</strong> <span id="eventTime">time</span></p>
-        <p><strong>📍Lieu :</strong> <span id="eventLocation">place</span></p>
-        <p><strong>📖description:</strong> <span id="eventDescription">texte</span></p>
-      </section>
-      <section class="right">
-        <div class="participants-line">
-          <div class="progress" id="eventProgress" style="width: 60%">30 / 50 participants</div>
+        <h1 id="eventTitle">NAME OF THE EVENT</h1>
+        <span id="eventClub">name of the club</span>
+        
+        <div class="event-info-grid">
+          <div class="info-item">
+            <strong><i class="fas fa-calendar-alt"></i> Date</strong>
+            <span id="eventDate">date</span>
+          </div>
+          <div class="info-item">
+            <strong><i class="fas fa-clock"></i> Time</strong>
+            <span id="eventTime">time</span>
+          </div>
+          <div class="info-item">
+            <strong><i class="fas fa-map-marker-alt"></i> Location</strong>
+            <span id="eventLocation">place</span>
+          </div>
         </div>
 
-        <button class="reg">Register now</button><br />
-        <button>add to calender</button><br />
-        <button>share event</button><br />
+        <div class="description-box">
+          <p id="eventDescription">texte</p>
+        </div>
       </section>
+
+      <aside class="right">
+        <div class="action-card">
+          <div class="participants-line">
+            <div class="progress" id="eventProgress" style="width: 60%">30 / 50 participants</div>
+          </div>
+          <button class="btn-action btn-primary"><i class="fas fa-user-plus"></i> Register Now</button>
+          <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-action btn-outline"><i class="fas fa-calendar-plus"></i> Add to Calendar</button>
+            <button class="btn-action btn-outline"><i class="fas fa-share-alt"></i> Share Event</button>
+          </div>
+        </div>
+      </aside>
     </div>
     <script>
       // Load event details from sessionStorage
