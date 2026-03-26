@@ -1,4 +1,4 @@
-﻿/* Buttons & Inputs*/
+/* Buttons & Inputs*/
 .btn {
     padding: 0.6rem 1.2rem;
     border: none;
@@ -18,22 +18,39 @@
 }
 
 .search-bar {
-    padding: 0.6rem 1rem;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
-    width: 300px;
-    margin-right: 1rem;
+    padding: 0.75rem 1.25rem;
+    border: 1.5px solid var(--border-light);
+    border-radius: 12px;
+    width: 320px;
+    font-size: 0.95rem;
+    background-color: var(--surface-white);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 4px 15px rgba(173, 157, 97, 0.15);
+    width: 380px;
 }
 
 .profile-avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.profile-avatar:hover {
     background-color: var(--accent-gold);
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(173, 157, 97, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /*Calendar Component*/

@@ -1,12 +1,17 @@
 /* --- HERO SECTION --- */
 .hero-section {
     text-align: center;
-    padding: 40px 0;
+    padding: 5rem 0 3.5rem;
+    background: radial-gradient(circle at center, rgba(43, 62, 78, 0.03) 0%, transparent 70%);
 }
 
 .hero-section h1 {
-    font-size: 2.5rem;
+    font-size: 3.5rem;
+    font-weight: 900;
     color: var(--primary-blue);
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 1rem;
 }
 
 .hero-section h1 span {
@@ -47,12 +52,33 @@
     /* No background-color, no border-radius needed here */
 }
 
+.section-title, .section-subtitle {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin: 4rem 0 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    letter-spacing: -0.5px;
+}
+
+.section-title::after, .section-subtitle::after {
+    content: '';
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-gold) 0%, transparent 100%);
+    flex-grow: 1;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
 /* --- FEATURED GRID (2 per row) --- */
 .featured-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 50px;
+    gap: 25px;
+    margin-bottom: 5rem;
 }
 
 .event-card-featured {

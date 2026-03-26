@@ -1,9 +1,15 @@
 /* Header Layout */
 .main-header {
-    background-color: var(--primary-blue);
+    background-color: rgba(43, 62, 78, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: white;
-    padding: 1rem 2rem;
-    box-shadow: var(--shadow-subtle);
+    padding: 0.75rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-container {
@@ -14,31 +20,67 @@
     margin: 0 auto;
 }
 
-.main-nav {
-    display: flex;
-    gap: 2rem;
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
-.header-actions {
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.main-nav {
     display: flex;
-    gap: 0.6rem;
-    align-items: center;
+    gap: 2.5rem;
 }
 
 .nav-link {
     color: rgba(255, 255, 255, 0.7);
     font-weight: 500;
-    transition: color 0.2s;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 0;
 }
 
-.nav-link.active,
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-gold);
+    transition: width 0.3s ease;
+}
+
 .nav-link:hover {
+    color: white;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.nav-link.active {
     color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.nav-link.active::after {
+    width: 100%;
 }
 
 .header-actions {
-    display: "flex";
-    justify-content: space-between;
+    display: flex;
+    gap: 1.2rem;
     align-items: center;
 }
 
@@ -53,7 +95,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(43, 62, 78, 0.05);
+}
+
+.dashboard-header h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    letter-spacing: -1.2px;
+    margin: 0;
+}
+
+.search-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
 .dashboard-grid {
