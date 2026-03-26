@@ -300,10 +300,10 @@
 
 /* The Hover Effect */
 .event-card:hover {
-    transform: translateX(8px);
-    background-color: #fff;
-    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.05);
-    border-color: var(--border-light);
+    transform: translateX(6px) translateY(-2px);
+    background-color: var(--surface-white);
+    box-shadow: 0 15px 35px rgba(43, 62, 78, 0.12);
+    border-color: var(--accent-gold);
 }
 
 /* The Image Zoom Effect */
@@ -314,6 +314,7 @@
     border-radius: var(--radius-sm);
     flex-shrink: 0;
     overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
 }
 
 .card-image img {
@@ -323,8 +324,13 @@
     transition: transform 0.5s ease;
 }
 
+.event-card:hover .card-image {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 .event-card:hover .card-image img {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 /* Active/Click effect */
