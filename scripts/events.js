@@ -1,38 +1,26 @@
-// Event data - loaded from JSON files
+// Event data - loaded from PHP API
 let eventsData = [];
 
-// List of all club event JSON files
-const clubEventFiles = [
-  "../data/ieee_events.json",
-  "../data/acm_events.json",
-  "../data/securinets_events.json",
-  "../data/aerobotix_events.json",
-  "../data/cine_radio_events.json",
-  "../data/jci_events.json",
-  "../data/junior_events.json",
-  "../data/theatro_events.json",
-];
-
-// Load events from all club JSON files
+// Load events from PHP API
 async function loadEvents() {
   try {
-    // Fetch all club event files in parallel
-    const responses = await Promise.all(
-      clubEventFiles.map((file) => fetch(file)),
-    );
-
-    // Parse all responses
-    const clubEvents = await Promise.all(
-      responses.map((response) => response.json()),
-    );
-
-    // Flatten and combine all events into a single array
-    eventsData = clubEvents.flat();
-
-    renderFeaturedEvents();
-    renderUpcomingEvents();
+    const response = await fetch("../backend/events.php?action=getAll",{ method: 'GET'});
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.status === 'success' && result.data) {
+      eventsData = result.data;
+      renderFeaturedEvents();
+      renderUpcomingEvents();
+    } else {
+      console.error("Error from API:", result.errors || result.message);
+    }
   } catch (error) {
-    console.error("Error loading events:", error);
+    console.error("Error loading events from API:", error);
   }
 }
 
@@ -131,41 +119,71 @@ function viewEvent(eventId) {
 }
 
 // Add a new event
-function addEvent(eventObj) {
-  const newId = Math.max(...eventsData.map((e) => e.id), 0) + 1;
-  const newEvent = {
-    id: newId,
-    featured: false,
-    ...eventObj,
-  };
-  eventsData.push(newEvent);
-  renderFeaturedEvents();
-  renderUpcomingEvents();
-  return newEvent;
+async function addEvent(eventObj) {
+  try {
+    const response = await fetch("../backend/events.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventObj),
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.status !== "success") {
+      throw new Error((result.errors && result.errors[0]) || "Failed to create event");
+    }
+
+    await loadEvents();
+    return result.data;
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return null;
+  }
 }
 
 // Remove an event by ID
-function removeEvent(eventId) {
-  const index = eventsData.findIndex((e) => e.id === eventId);
-  if (index !== -1) {
-    eventsData.splice(index, 1);
-    renderFeaturedEvents();
-    renderUpcomingEvents();
+async function removeEvent(eventId) {
+  try {
+    const response = await fetch(`../backend/events.php?id=${encodeURIComponent(eventId)}`, {
+      method: "DELETE",
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.status !== "success") {
+      throw new Error((result.errors && result.errors[0]) || "Failed to delete event");
+    }
+
+    await loadEvents();
     return true;
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    return false;
   }
-  return false;
 }
 
 // Update an event
-function updateEvent(eventId, updates) {
-  const event = eventsData.find((e) => e.id === eventId);
-  if (event) {
-    Object.assign(event, updates);
-    renderFeaturedEvents();
-    renderUpcomingEvents();
-    return event;
+async function updateEvent(eventId, updates) {
+  try {
+    const response = await fetch(`../backend/events.php?id=${encodeURIComponent(eventId)}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updates),
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.status !== "success") {
+      throw new Error((result.errors && result.errors[0]) || "Failed to update event");
+    }
+
+    await loadEvents();
+    return result.data;
+  } catch (error) {
+    console.error("Error updating event:", error);
+    return null;
   }
-  return null;
 }
 
 // Get all events

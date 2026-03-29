@@ -23,21 +23,21 @@
       <source src="../assets/twinkling_stars_background.mp4" type="video/mp4">
     </video>
     <div class="glass-container register-card">
-      <form class="login-form">
+      <form action="../backend/register.php" method="POST" class="login-form">
         <h1>Register</h1>
 
         <div class="input-box">
-          <input type="text" placeholder="Full Name" required />
+          <input type="text" placeholder="Full Name" name="fullName" required />
           <i class="fa-solid fa-user-tag"></i>
         </div>
 
         <div class="input-box">
-          <input type="text" placeholder="Username" required />
+          <input type="text" placeholder="Username" name="username" required />
           <i class="fa-solid fa-user"></i>
         </div>
 
         <div class="input-box email-group">
-          <input type="text" placeholder="University Email" required />
+          <input type="text" placeholder="University Email" name="email" required />
 
           <span class="domain-suffix">@insat.ucar.tn</span>
 
@@ -60,18 +60,18 @@
         </div>
 
         <div class="input-box">
-          <input type="password" placeholder="Password" required />
+          <input type="password" placeholder="Password" name="password" required />
           <i class="fa-solid fa-lock"></i>
         </div>
 
         <div class="input-box">
-          <input type="password" placeholder="Confirm Password" required />
+          <input type="password" placeholder="Confirm Password" name="confirmPassword" required />
           <i class="fa-solid fa-shield-halved"></i>
         </div>
 
         <div class="terms-check">
           <label>
-            <input type="checkbox" required />
+            <input type="checkbox" name="acceptTerms" required />
             I accept the terms & data privacy policy
           </label>
         </div>

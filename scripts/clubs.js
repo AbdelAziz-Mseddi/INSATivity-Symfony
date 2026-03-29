@@ -4,15 +4,23 @@ let selectedCategory = 'All';
 // Fetch clubs data from JSON
 async function loadClubs() {
   try {
-    const response = await fetch('../data/clubs.json');
+    const response = await fetch("../backend/clubs.php?action=getAll",{ method: 'GET'});
+    
     if (!response.ok) {
-      throw new Error(`Failed to load clubs: ${response.statusText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    allClubs = await response.json();
-    renderClubs(allClubs);
-    setupFilterButtons();
+    
+    const result = await response.json();
+    
+    if (result.status === 'success' && result.data) {
+      allClubs = result.data;
+      renderClubs(allClubs);
+      setupFilterButtons();
+    } else {
+      console.error("Error from API:", result.errors || result.message);
+    }
   } catch (error) {
-    console.error('Error loading clubs:', error);
+    console.error("Error loading events from API:", error);
   }
 }
 
@@ -45,7 +53,7 @@ function renderClubs(clubs) {
           <p class="club-desc">${club.description}</p>
           <div class="card-footer-custom">
             <div class="d-flex gap-2">
-              <a href="#" class="btn-view">View Club</a>
+              <a href="club-dashboard.html?club=${encodeURIComponent(club.id)}" class="btn-view">View Club</a>
               <button class="btn-join">Join</button>
             </div>
           </div>
