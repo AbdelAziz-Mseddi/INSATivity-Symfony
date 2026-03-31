@@ -694,8 +694,336 @@ cat .env | grep SUPABASE_DB
 
 ---
 
+## FAQ
+
+### Q: What is `getenv()` function?
+
+`getenv()` is a PHP built-in function that **retrieves environment variables** set by the OS or `.env` file.
+
+```php
+// Syntax
+$value = getenv('VARIABLE_NAME');
+
+// Example
+$host = getenv('SUPABASE_DB_HOST');
+// Returns: "aws-0-region.pooler.supabase.com" or false if not found
+
+// With default fallback
+$port = getenv('SUPABASE_DB_PORT') ?: '5432';
+// Uses custom port if set, otherwise defaults to 5432
+```
+
+**Difference: `getenv()` vs `$_ENV`:**
+
+Both access environment variables, but `getenv()` is more flexible:
+
+```php
+// Using getenv() - can provide default fallback
+$port = getenv('PORT') ?: '5432';
+
+// Using $_ENV - must check if key exists first
+$port = isset($_ENV['PORT']) ? $_ENV['PORT'] : '5432';
+```
+
+In your code:
+```php
+$host = self::getRequiredEnv('SUPABASE_DB_HOST');      // Throws if missing
+$port = getenv('SUPABASE_DB_PORT') ?: '5432';         // Optional, uses default
+```
+
+---
+
+### Q: What is the `@` symbol in `@pg_connect()`?
+
+The `@` is a **PHP error suppression operator**. It silences PHP warnings and errors.
+
+```php
+// Without @: shows PHP warning if connection fails
+$connection = pg_connect($connectionString);
+// Warning: pg_connect(...): Unable to connect to PostgreSQL server...
+
+// With @: error is silenced
+$connection = @pg_connect($connectionString);
+// (No visible warning, but still returns false)
+```
+
+**Why might you use it?**
+
+When you want to handle errors yourself instead of showing PHP warnings:
+
+```php
+$connection = @pg_connect($connectionString);
+if (!$connection) {
+    // Custom error handling
+    throw new Exception('Could not connect to database');
+}
+```
+
+**Modern best practice (no `@`):**
+
+Capture the actual error message for better debugging:
+
+```php
+// No @ symbol - let's get the real error
+$connection = pg_connect($connectionString);
+if (!$connection) {
+    $error = pg_last_error();
+    throw new Exception('Connection failed: ' . $error);
+}
+```
+
+**Why the refactor?**
+- Explicit error messages help debugging
+- No hidden errors in logs
+- Follows modern PHP best practices
+- Makes code more maintainable
+
+---
+
+### Q: Why `escapeConnectionValue()` if parameterized queries are safe?
+
+Great question! **Parameterized queries protect SQL statements, but connection strings are different.**
+
+**Parameterized queries ARE SQL injection safe:**
+
+```php
+// Safe: username is passed separately, not in the SQL
+pg_query_params(
+    $connection,
+    "SELECT * FROM users WHERE username = $1",
+    [$username]
+);
+
+// Even if $username = "'; DROP TABLE users; --"
+// It's treated as DATA, not executable code
+// Result: SELECT * FROM users WHERE username = "'; DROP TABLE users; --"
+//         (literally looks for that string)
+```
+
+**BUT connection strings are config, not SQL:**
+
+Connection strings follow PostgreSQL's own syntax:
+
+```php
+// Connection string syntax:
+"host='example.com' port='5432' user='admin' password='secret'"
+
+// If password contains single quote: "pass'word"
+// Without escaping:
+"host='example.com' user='admin' password='pass'word'"
+//                                            ^ Quote ends prematurely!
+// This breaks the connection string
+
+// With escaping:
+"host='example.com' user='admin' password='pass\'word'"
+//                                             ^ Escaped quote
+// Now it parses correctly
+```
+
+**`escapeConnectionValue()` escapes the connection string syntax:**
+
+```php
+private static function escapeConnectionValue($value) {
+    // Escape backslashes and single quotes
+    return str_replace(["\\", "'"], ["\\\\", "\\'"], $value);
+}
+
+// Example:
+$password = "pass'word";
+$escaped = self::escapeConnectionValue($password);
+echo $escaped;  // Output: pass\'word
+```
+
+**In context:**
+
+```php
+$password = "my'secret";
+$escaped = self::escapeConnectionValue($password);  // "my\'secret"
+
+$connectionString = sprintf(
+    "password='%s'",
+    $escaped
+);
+// Result: password='my\'secret'  ✓ Valid syntax
+// Without escaping: password='my'secret'  ✗ Syntax error
+```
+
+**TL;DR:**
+- Parameterized queries protect **SQL statements** ✓
+- `escapeConnectionValue()` protects **connection string syntax** ✓
+- They protect different things!
+
+PostgreSQL uses **schemas** – a namespace layer. `public` is the default schema.
+
+```sql
+-- These are equivalent:
+SELECT * FROM users;
+SELECT * FROM public.users;
+```
+
+Using `public.users` explicitly is better because:
+- **Clarity** – immediately shows which schema owns the table
+- **Security** – easier to control schema access
+- **Portability** – if you move tables to other schemas, code still works
+
+Think of schemas like folders: `users` is a filename, `public.users` is `/home/documents/users`.
+
+---
+
+### Q: What is `$_ENV`? How does it differ from `$_SERVER` and `$_GET`?
+
+PHP superglobals are built-in arrays that hold different data:
+
+| Superglobal | Contains | Set By | Example |
+|-------------|----------|--------|---------|
+| `$_ENV` | **Environment variables** | OS / `.env` file | `$_ENV['SUPABASE_DB_HOST']` |
+| `$_SERVER` | **Request metadata** | HTTP request | `$_SERVER['REQUEST_METHOD']` = "POST" |
+| `$_GET` | **URL query params** | Browser URL | `?id=123` → `$_GET['id']` |
+| `$_POST` | **Form body data** | `<form method="POST">` | `$_POST['username']` |
+| `$_SESSION` | **Persistent session data** | Server-side storage | `$_SESSION['user']['email']` |
+| `$_COOKIE` | **HTTP cookies** | Browser cookies | `$_COOKIE['session_id']` |
+
+**Key distinction:**
+
+```php
+// Configuration (from .env, doesn't change per request)
+$db_host = $_ENV['SUPABASE_DB_HOST'];
+
+// Request context (unique per request)
+$method = $_SERVER['REQUEST_METHOD'];      // Which HTTP method?
+$form_username = $_POST['username'];       // What did user submit?
+$query_param = $_GET['id'];                // What's in the URL?
+$session_user = $_SESSION['user']['id'];   // Who is logged in?
+```
+
+**Why separate them?**
+- `$_ENV` = app secrets, config (stable across all requests)
+- `$_SERVER`, `$_GET`, `$_POST` = request data (unique per request)
+- `$_SESSION` = user state (persists between requests)
+
+---
+
+### Q: How is the app connected to Supabase?
+
+**Step-by-step connection flow:**
+
+```
+1. User registers at /register.html
+   ↓
+2. Form submits to backend/register.php (POST)
+   ↓
+3. register.php requires AuthManager.php
+   ↓
+4. AuthManager.__construct() calls Database::connect()
+   ↓
+5. Database::loadEnvironment()
+   - phpdotenv reads .env file
+   - Loads into $_ENV and getenv()
+   - Example: $_ENV['SUPABASE_DB_HOST'] = "aws-0-region.pooler.supabase.com"
+   ↓
+6. Database::connect()
+   - Reads from $_ENV: host, user, password, port, etc.
+   - Builds connection string: "host='...' user='...' password='...' sslmode='require'"
+   - Calls pg_connect(connectionString)
+   - Returns open socket/resource to Supabase Postgres
+   ↓
+7. AuthManager::registerUser()
+   - Uses pg_query_params() to send SQL INSERT to Supabase
+   - Example: "INSERT INTO public.users (username, email, ...) VALUES ($1, $2, ...)"
+   - Gets response from Supabase
+   ↓
+8. User is stored in Supabase's Postgres database
+```
+
+**Visual architecture:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Your PHP Web App                         │
+│  /pages/register.html ──form──> /backend/register.php           │
+│                                      ↓                          │
+│                              require AuthManager.php             │
+│                                      ↓                          │
+│                         $auth = new AuthManager()               │
+│                                      ↓                          │
+│                         Database::connect()                     │
+│                              ↓                                  │
+│                    phpdotenv loads .env                         │
+│                    Reads: host, user, password                  │
+│                              ↓                                  │
+│                 pg_connect($connectionString)                   │
+└───────────────────────────────────────────────────────────┬─────┘
+                                                             │
+                        SSL/TLS Encryption                  │
+                    (HTTPS-like for databases)              │
+                                                             │
+┌───────────────────────────────────────────────────────────v─────┐
+│                    Supabase PostgreSQL Server                    │
+│                                                                  │
+│   database: postgres                                            │
+│   ├── public schema                                             │
+│   │   ├── users table                                           │
+│   │   │   ├── id (BIGSERIAL)                                   │
+│   │   │   ├── username (TEXT UNIQUE)                           │
+│   │   │   ├── email (TEXT UNIQUE)                              │
+│   │   │   ├── password_hash (TEXT)                             │
+│   │   │   └── ...                                              │
+│   │   ├── clubs table                                          │
+│   │   └── events table                                         │
+│   └── ...                                                       │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**Key connection details:**
+
+| Component | Value | Source |
+|-----------|-------|--------|
+| Host | `aws-0-region.pooler.supabase.com` | `.env` → Supabase Dashboard |
+| Port | `5432` | Standard Postgres port (or `.env` override) |
+| Database | `postgres` | Supabase default database |
+| User | `postgres.project_ref` | Created by Supabase |
+| Password | `secret_password` | Set during Supabase project creation |
+| SSL Mode | `require` | Encrypts the connection |
+
+**Connection string example:**
+
+```bash
+# This is what pg_connect() receives:
+host='aws-0-region.pooler.supabase.com' \
+port='5432' \
+dbname='postgres' \
+user='postgres.xyz123' \
+password='super_secret_pass' \
+sslmode='require'
+```
+
+Once connected, you can send SQL queries:
+
+```php
+$connection = Database::connect();  // Open connection
+
+// Send a query (parameterized)
+$result = pg_query_params(
+    $connection,
+    'INSERT INTO public.users (username, email, password_hash) VALUES ($1, $2, $3)',
+    [$username, $email, $hashed_password]
+);
+
+// Supabase processes the query, returns result
+$user = pg_fetch_assoc($result);
+```
+
+**Why SSL/TLS?**
+- Credentials and data are encrypted in transit
+- Prevents network eavesdropping
+- Industry standard for database connections
+
+---
+
 ## References
 
 - [Supabase PostgreSQL Documentation](https://supabase.com/docs/guides/database)
 - [PHP pgsql Extension](https://www.php.net/manual/en/ref.pgsql.php)
+- [PHP Superglobals](https://www.php.net/manual/en/language.variables.superglobals.php)
+- [PostgreSQL Schemas](https://www.postgresql.org/docs/current/ddl-schemas.html)
 - [bcrypt Password Hashing](https://www.php.net/manual/en/function.password-hash.php)
