@@ -131,7 +131,8 @@ Web-Dev-Project/
 ## 🚀 Setup & Installation
 
 ### Prerequisites
-- PHP 8.0 or higher
+- PHP 8.1 or higher
+- **Composer** (PHP dependency manager)
 - Web server (Apache, Nginx, or built-in PHP server)
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 
@@ -142,14 +143,25 @@ Web-Dev-Project/
    cd Web-Dev-Project
    ```
 
-2. **Ensure proper file permissions**
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
+   This installs phpdotenv for secure environment variable loading.
+
+3. **Ensure proper file permissions**
    ```bash
    chmod -R 755 backend/
    chmod -R 755 data/
    chmod -R 755 assets/uploads/
    ```
 
-3. **Start a local server**
+4. **Configure Supabase Postgres for auth**
+   - Copy `.env.example` to `.env`
+   - Fill `SUPABASE_DB_*` values from Supabase Project Settings > Database
+   - Run `backend/supabase_auth_schema.sql` in the Supabase SQL Editor to create `public.users`
+
+5. **Start a local server**
    
    Using PHP built-in server:
    ```bash
@@ -158,7 +170,7 @@ Web-Dev-Project/
    
    Or configure with Apache/Nginx
 
-4. **Access the application**
+6. **Access the application**
    - Open `http://localhost:8000` in your browser
    - Navigate to the homepage
 
@@ -258,6 +270,14 @@ Web-Dev-Project/
 - Student information form
 - Email and password validation
 - Club selection/affiliation
+
+## 🔐 Authentication
+
+User registration and login are backed by Supabase PostgreSQL. See [docs/SUPABASE_AUTH.md](docs/SUPABASE_AUTH.md) for:
+- Architecture and implementation details
+- Database schema and setup
+- API endpoints and validation rules
+- Security practices and troubleshooting
 - Terms acceptance checkbox
 - Form submission and confirmation
 

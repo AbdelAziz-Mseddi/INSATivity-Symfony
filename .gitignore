@@ -3,6 +3,10 @@ node_modules/
 bower_components/
 jspm_packages/
 web_modules/
+vendor/
+
+# Composer
+composer.lock
 
 # Build outputs
 /dist/
@@ -27,3 +31,6 @@ pnpm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# ozymandias
+.env
