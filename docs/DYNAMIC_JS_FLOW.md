@@ -1,236 +1,202 @@
 # Dynamic JavaScript Flow Documentation
 
-This document explains how dynamic behavior works in the frontend: which script boots each page, how data is loaded, how UI is updated, and how state moves between pages.
+This document describes how dynamic frontend behavior currently works across pages, including data loading, UI rendering, and page-to-page state transfer.
 
-## 1. Frontend Script Map
-
-Page -> script:
+## 1. Script Map by Page
 
 - `pages/index.html` -> `scripts/events.js`
 - `pages/clubs.html` -> `scripts/clubs.js`
-- `pages/club-dashboard.html` -> `scripts/club-dashboard.js` (ES module)
+- `pages/club-dashboard.html` -> `scripts/club-dashboard.js` (ES module + submodules)
 - `pages/calendar.html` -> `scripts/calendar.js`
-- `pages/event.html` -> inline script in the HTML page
+- `pages/event.html` -> inline script in the page
 
-## 2. Shared Dynamic Patterns Used in Project
+## 2. Global Runtime Pattern
 
 Most pages follow this lifecycle:
 
 1. Wait for `DOMContentLoaded`.
-2. Fetch data (or load from storage).
-3. Transform/filter/sort data.
-4. Render DOM by creating/replacing HTML blocks.
-5. Attach event listeners for user actions.
-6. Trigger updates (re-render or navigation) when state changes.
+2. Fetch data from backend or load browser storage.
+3. Normalize/filter/sort data in memory.
+4. Render DOM with `innerHTML`/`createElement`.
+5. Attach click/submit listeners.
+6. Re-render after mutations.
 
-## 3. Home/Events Page Flow (`scripts/events.js`)
+## 3. Home Events Flow (`scripts/events.js`)
 
-### 3.1 Boot flow
+### 3.1 Boot
 
-On page load:
-
-- Calls `loadEvents()`.
-- `loadEvents()` sends `GET ../backend/events.php?action=getAll`.
-- Stores returned list in in-memory `eventsData` array.
-- Calls:
+- On load, `loadEvents()` fetches `GET ../backend/events.php?action=getAll`.
+- Response data is stored in local array `eventsData`.
+- Then:
   - `renderFeaturedEvents()`
   - `renderUpcomingEvents()`
 
-### 3.2 Rendering behavior
+### 3.2 Rendering
 
 `renderFeaturedEvents()`:
 
-- Filters by `event.featured === true`.
-- Builds clickable cards inside `.featured-grid`.
-- Click action -> `viewEvent(event.id)`.
+- Filters `event.featured === true`.
+- Renders `.event-card-featured` cards into `.featured-grid`.
+- Card click -> `viewEvent(event.id)`.
 
 `renderUpcomingEvents()`:
 
-- Keeps events with date >= today.
-- Sorts by nearest date.
-- Builds cards in `.events-container`.
-- Click action -> `viewEvent(event.id)`.
+- Keeps events with `event.date >= today`.
+- Sorts by ascending date.
+- Renders cards into `.events-container`.
+- Card click -> `viewEvent(event.id)`.
 
-### 3.3 Navigation + transient state
+### 3.3 Event detail transition
 
-`viewEvent(event.id)`:
+`viewEvent(eventId)`:
 
-1. Finds selected event in `eventsData`.
-2. Saves full object to `sessionStorage` under `currentEvent`.
+1. Finds event object in `eventsData`.
+2. Saves object to `sessionStorage` under key `currentEvent`.
 3. Navigates to `event.html`.
 
-This is the bridge between the list page and event detail page.
-
-### 3.4 API write helpers present in script
-
-The file also includes:
-
-- `addEvent(eventObj)` -> POST `events.php`
-- `removeEvent(eventId)` -> DELETE `events.php?id=...`
-- `updateEvent(eventId, updates)` -> PUT `events.php?id=...`
-
-Each operation refreshes local view by calling `loadEvents()` again.
-
-## 4. Event Detail Page Flow (`pages/event.html` inline script)
+## 4. Event Detail Page (`pages/event.html` inline script)
 
 On `DOMContentLoaded`:
 
 1. Read `sessionStorage.getItem("currentEvent")`.
-2. Parse JSON if present.
-3. Fill title/club/date/time/location/description DOM nodes.
-4. Compute participation progress:
-   - `progressPercent = participants / maxParticipants * 100`
-5. Set progress bar width/text.
-6. Set background image from `event.image`.
+2. If available, parse JSON and fill event fields (title, club, date, time, location, description).
+3. Compute and render progress bar from `participants/maxParticipants`.
+4. Set hero background image from `event.image`.
 
-Example behavior:
+Notes:
 
-- Clicking any event card on homepage immediately opens detail view with the same object payload, without re-fetching from backend.
+- Page currently relies on `sessionStorage` payload and does not fetch event details directly from backend.
+- If storage is empty, page stays with placeholder/default content.
 
 ## 5. Clubs Listing Flow (`scripts/clubs.js`)
 
-### 5.1 Data load
+### 5.1 Load
 
 - `loadClubs()` fetches `GET ../backend/clubs.php?action=getAll`.
-- Saves response in `allClubs`.
-- Calls `renderClubs(allClubs)`.
-- Initializes category filters via `setupFilterButtons()`.
+- Saves result into `allClubs`.
+- Calls `renderClubs(allClubs)` and `setupFilterButtons()`.
 
-### 5.2 Dynamic filtering
+### 5.2 Render
 
-Each `.filter-btn` click:
+- Builds club cards inside `#clubs-container`.
+- Each card links to: `club-dashboard.html?club=<clubId>`.
 
-1. Updates active button classes.
-2. Reads `data-category`.
-3. Filters `allClubs` unless category is `All`.
-4. Re-renders list with selected subset.
+### 5.3 Filters
 
-### 5.3 Deep-link transition
+- Filter buttons (`.filter-btn`) are wired once.
+- Clicking a button toggles active classes and filters in-memory `allClubs` by exact `category`.
 
-Each card contains:
-
-- `club-dashboard.html?club=<clubId>`
-
-This query parameter drives the dashboard content for the selected club.
-
-## 6. Club Dashboard Modular Flow (`scripts/club-dashboard.js` + modules)
-
-This is the most structured dynamic flow in the project.
+## 6. Club Dashboard Flow (`scripts/club-dashboard.js` + modules)
 
 ### 6.1 Modules and responsibilities
 
-- `club-dashboard/api.js`: backend fetch/upload/create wrappers.
-- `club-dashboard/constants.js`: club ID/name mappings + default club.
-- `club-dashboard/utils.js`: normalization, escaping, date labeling, split logic.
-- `club-dashboard/render.js`: all DOM rendering and sidebar panel switching.
-- `club-dashboard.js`: orchestration (load, filter, submit handling, refresh).
+- `scripts/club-dashboard/api.js`: backend requests for club/event/media.
+- `scripts/club-dashboard/constants.js`: default club + club name map.
+- `scripts/club-dashboard/utils.js`: URL parsing, text normalization, date split/helpers.
+- `scripts/club-dashboard/render.js`: all panel rendering + sidebar behavior.
+- `scripts/club-dashboard.js`: orchestration and form submit flow.
 
-### 6.2 Dashboard boot flow
+### 6.2 Boot sequence
 
-On `DOMContentLoaded` in `club-dashboard.js`:
+On `DOMContentLoaded`:
 
-1. Collect DOM references via `getDashboardDom()`.
-2. Bind sidebar navigation with `bindSidebar(dom)`.
-3. Execute `loadDashboardData()`.
+1. Build DOM references with `getDashboardDom()`.
+2. Bind sidebar panel navigation with `bindSidebar(dom)`.
+3. Run `loadDashboardData()`.
 
-`loadDashboardData()` runtime:
+`loadDashboardData()` flow:
 
-1. Read `club` query param using `getRequestedClubId()`.
+1. Read query param club id via `getRequestedClubId()`.
 2. Fetch selected club with `fetchClubById(...)`.
-3. If invalid club in URL, fallback to default club.
-4. Fetch all events with `fetchAllEvents()`.
-5. Keep only events relevant to active club (`getClubEvents`).
-6. Split into upcoming vs finished (`splitEventsByDate`).
-7. Render profile + pending + history + done + feedback options.
+3. If requested club is invalid, fallback to `DEFAULT_CLUB_ID`.
+4. Fetch all events via `fetchAllEvents()`.
+5. Keep only events matching active club through `getClubEvents(...)`.
+6. Split club events into upcoming/finished via `splitEventsByDate(...)`.
+7. Render profile, pending, history, done, and feedback selector.
 
-### 6.3 Club event matching strategy
+### 6.3 Club-event matching strategy
 
-`getClubEvents(allEvents, club)` matches by:
+`getClubEvents(...)` matches an event when one of these conditions passes:
 
-- normalized event `club` name == normalized club display name, or
-- normalized event `club` name == mapped manager name, or
-- `event.clubLogo` path includes `/assets/images/<clubId>/`
+- `event.club` normalized == club display name normalized
+- `event.club` normalized == mapped manager name normalized
+- `event.clubLogo` contains `/assets/images/<clubId>/`
 
-This makes matching robust when data naming varies slightly.
+This tolerates minor naming/path inconsistencies.
 
-### 6.4 Create Event dynamic flow
+### 6.4 Create event flow
 
 When `.event-create-form` is submitted:
 
-1. Validate that a cover image exists.
-2. Determine active club context (ID + display name).
-3. Upload image via `uploadCoverImage(file, clubId)`.
+1. Validate a cover file is provided.
+2. Resolve active club context (`clubId`, `clubName`).
+3. Upload image with `uploadCoverImage(file, clubId)`.
 4. Build event payload from form fields.
-5. Send payload to `createEvent(payload)`.
-6. Reset form + show success status.
-7. Reload dashboard data to display new event.
+5. Call `createEvent(payload)`.
+6. Reset form + show status text.
+7. Reload dashboard data to show latest state.
 
-Important payload details:
+Payload fields include:
 
-- `clubLogo` is derived from club ID: `../assets/images/<clubId>/profile.jpg`.
-- `description` appends end-time metadata when provided.
-- `featured` defaults to `false` from dashboard creation flow.
+- `clubLogo`: `../assets/images/<clubId>/profile.jpg`
+- `description`: appends `End time: ...` when provided
+- `participants`: starts at `0`
+- `featured`: forced to `false` from dashboard form
 
-## 7. Calendar Page Flow (`scripts/calendar.js`)
+## 7. Calendar Flow (`scripts/calendar.js`)
 
-This page is fully client-side and currently independent from backend APIs.
+This page is currently local-only and independent from backend events/clubs APIs.
 
-### 7.1 State model
+### 7.1 State
 
-- Events are stored in `localStorage` under key `insativity_events`.
-- If empty/invalid, fallback to hardcoded `DEFAULT_EVENTS`.
-- In-memory state:
+- Storage key: `insativity_events` in `localStorage`.
+- Fallback seed: `DEFAULT_EVENTS` when storage is missing/invalid.
+- Runtime state:
   - `events`
-  - current viewed month/year
-  - selected day
+  - `current` month/year
+  - `selected` day
 
-### 7.2 Dynamic rendering cycle
+### 7.2 Rendering cycle
 
 `renderCalendar()`:
 
-1. Compute month boundaries and grid size.
-2. Build day cells (including muted previous/next month cells).
-3. Mark styles for current day/weekends/selected/has-event.
-4. Inject up to 2 event pills per day + `+N` overflow marker.
-5. Attach click listeners to valid current-month day cells.
+1. Compute month boundaries and visible grid size.
+2. Build cells for previous/current/next month overflow.
+3. Mark classes: current day, weekend, selected day, has-event.
+4. Render up to 2 event pills/day plus `+N` overflow indicator.
+5. Bind click handlers on current-month cells.
 
 `openDayPanel(...)`:
 
-- Shows per-day agenda list.
-- Binds delete handlers per event.
-- Enables quick add-event modal prefilled with selected date.
+- Renders agenda entries for selected day.
+- Wires per-event delete buttons.
+- Wires add-event button with prefilled date.
 
-### 7.3 Mutation actions
+### 7.3 Mutations
 
-- Add event -> push to `events`, save to localStorage, re-render.
-- Delete event -> filter array, save, re-render.
-- Search bar -> debounced filter for featured cards (`200ms`).
+- Add event (modal submit) -> push to `events`, save, re-render.
+- Delete event -> filter `events`, save, re-render.
+- Search input -> debounced (`200ms`) filtering of featured cards.
 
-## 8. Dynamic JS Examples
+## 8. API Helper Nuance in `events.js`
 
-### Example A: Homepage to detail page transition
+`events.js` contains helper functions:
 
-1. User clicks featured card in homepage.
-2. `viewEvent(id)` stores object in sessionStorage.
-3. Browser navigates to `event.html`.
-4. Detail page inline script reads object and paints UI.
+- `addEvent(eventObj)` -> `POST ../backend/events.php` (without `action`)
+- `removeEvent(eventId)` -> `DELETE ../backend/events.php?id=...` (without `action`)
+- `updateEvent(eventId, updates)` -> `PUT ../backend/events.php?id=...` (without `action`)
 
-### Example B: Club dashboard create event
+Current backend `events.php` requires `action` for every method, so these helpers are not aligned with the router contract unless updated to include:
 
-1. User submits create form with image.
-2. Frontend uploads image file first (`media.php`).
-3. Frontend sends event JSON (`events.php?action=create`).
-4. UI reloads dashboard and newly created event appears in proper section after date-based split.
+- `action=create`
+- `action=delete`
+- `action=update`
 
-### Example C: Club filtering without extra API calls
+## 9. Current Architecture Notes
 
-1. `clubs.js` loads all clubs once.
-2. Filter button clicks only operate on in-memory `allClubs`.
-3. DOM is rebuilt for each selected category.
-
-## 9. Current Architectural Notes
-
-- The app mixes backend-driven pages (`events.js`, `clubs.js`, dashboard) and local-only page state (`calendar.js`).
-- `sessionStorage` is used as a lightweight cross-page transport for selected event details.
-- Rendering is imperative (manual `innerHTML`/`createElement`) rather than framework-based reactive rendering.
-- Error handling is mostly console-based except dashboard create form, which exposes inline status messages to users.
+- Mixed data strategy:
+  - Backend-driven pages: home, clubs, club dashboard
+  - Local storage page: calendar
+- Event detail page uses session storage as transport, not direct fetch.
+- Rendering remains imperative (DOM APIs), no frontend framework.
+- User-facing inline status messaging is strongest in club dashboard; other pages rely mainly on console error logs.

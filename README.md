@@ -54,7 +54,8 @@ A modern, responsive web platform for university students to discover upcoming a
 
 ### Backend
 - **PHP 8+** - Server-side logic
-- **JSON** - Data storage (flat-file database)
+- **Supabase Postgres (PDO)** - Persistent data storage for users/clubs/events
+- **Local filesystem** - Upload storage at `assets/uploads/`
 
 ### Key Libraries & APIs
 - **Fetch API** - Asynchronous HTTP requests
@@ -100,16 +101,6 @@ Web-Dev-Project/
 │   ├── club-dashboard.css   # Dashboard specific styles
 │   ├── event.css            # Event details page styles
 │   └── page.css             # General page styles
-├── data/                     # JSON data files
-│   ├── clubs.json           # Club information & metadata
-│   ├── acm_events.json      # ACM club events
-│   ├── aerobotix_events.json # Aerobotix club events
-│   ├── cine_radio_events.json # Ciné Radio club events
-│   ├── ieee_events.json     # IEEE club events
-│   ├── jci_events.json      # JCI club events
-│   ├── junior_events.json   # Junior club events
-│   ├── securinets_events.json # Securinets club events
-│   └── theatro_events.json  # Theatro club events
 └── assets/                   # Static assets
     ├── images/              # Event and club images
     │   ├── 3zero/          # 3zero club images
@@ -152,14 +143,15 @@ Web-Dev-Project/
 3. **Ensure proper file permissions**
    ```bash
    chmod -R 755 backend/
-   chmod -R 755 data/
    chmod -R 755 assets/uploads/
    ```
 
-4. **Configure Supabase Postgres for auth**
+4. **Configure Supabase Postgres connection**
    - Copy `.env.example` to `.env`
-   - Fill `SUPABASE_DB_*` values from Supabase Project Settings > Database
-   - Run `backend/supabase_auth_schema.sql` in the Supabase SQL Editor to create `public.users`
+   - Fill `DATABASE_*` values from Supabase Project Settings > Database
+   - Keep `SUPABASE_DB_SSLMODE=require` (or set explicitly)
+   - Run `backend/supabase_auth_schema.sql` to create `public.users`
+   - Run `backend/supabase_content_schema_and_seed.sql` to create/seed `public.clubs` and `public.events`
 
 5. **Start a local server**
    
