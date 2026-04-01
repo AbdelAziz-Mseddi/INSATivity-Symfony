@@ -29,11 +29,15 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.2;
 }
 
 .logo:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
+    opacity: 0.9;
 }
 
 .main-nav {
