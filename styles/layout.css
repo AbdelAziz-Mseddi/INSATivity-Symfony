@@ -1,11 +1,14 @@
 /* Header Layout */
 .main-header {
-    background-color: rgba(43, 62, 78, 0.95);
+    background-color: #2b3e4e; /* Fully opaque to prevent bleed-through on scroll */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: white;
-    padding: 0.75rem 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -17,11 +20,13 @@
     justify-content: space-between;
     align-items: center;
     max-width: 1400px;
+    width: 100%;
     margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 800;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
@@ -32,7 +37,8 @@
     transition: all 0.3s ease;
     text-decoration: none;
     display: inline-block;
-    line-height: 1.2;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .logo:hover {
@@ -42,16 +48,20 @@
 
 .main-nav {
     display: flex;
-    gap: 2.5rem;
+    gap: 3rem;
+    position: absolute; /* Center navigation regardless of logo/actions width */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .nav-link {
     color: rgba(255, 255, 255, 0.7);
-    font-weight: 500;
+    font-weight: 500; /* Fixed weight to prevent jitter */
     font-size: 0.95rem;
     transition: all 0.3s ease;
     position: relative;
     padding: 0.5rem 0;
+    white-space: nowrap;
 }
 
 .nav-link::after {
@@ -75,7 +85,6 @@
 
 .nav-link.active {
     color: var(--accent-gold);
-    font-weight: 600;
 }
 
 .nav-link.active::after {

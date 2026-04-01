@@ -39,6 +39,7 @@ const btnPrev = $('btnPrev');
 const btnNext = $('btnNext');
 const btnToday = $('btnToday');
 const dayPanel = $('dayPanel');
+const dayPanelOverlay = $('dayPanelOverlay');
 const dayPanelTitle = $('dayPanelTitle');
 const dayPanelList = $('dayPanelList');
 const btnAddEvent = $('btnAddEvent');
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFeatured();
     bindControls();
     bindModal();
+    bindDayPanel();
     bindSearch();
 });
 
@@ -202,13 +204,18 @@ function openDayPanel(year, month, day) {
         );
     }
 
-    dayPanel.classList.add('open');
+    dayPanelOverlay.classList.add('open');
 }
 
 function closeDayPanel() {
-    dayPanel.classList.remove('open');
+    dayPanelOverlay.classList.remove('open');
     selected = null;
     renderCalendar();
+}
+
+function bindDayPanel() {
+    btnClosePanel.addEventListener('click', closeDayPanel);
+    dayPanelOverlay.addEventListener('click', e => { if (e.target === dayPanelOverlay) closeDayPanel(); });
 }
 
 function renderFeatured(filter = '') {
