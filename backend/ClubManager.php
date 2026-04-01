@@ -1,170 +1,149 @@
 <?php
 
+require_once 'Database.php';
+
 class ClubManager {
-    private $clubs = [];
-    private $dataDir;
+    private $connection;
 
     public function __construct() {
-        $this->dataDir = __DIR__ . '/../data/';
-        $this->loadClubsFromFile();
+        $this->connection = Database::connect();
     }
 
-    /**
-     * Load all clubs from the JSON file
-     */
-    private function loadClubsFromFile() {
-        $filePath = $this->dataDir . 'clubs.json';
-        
-        if (file_exists($filePath)) {
-            try {
-                $jsonContent = file_get_contents($filePath);
-                $clubsData = json_decode($jsonContent, true);
-                
-                if (is_array($clubsData)) {
-                    $this->clubs = $clubsData;
-                }
-            } catch (Exception $e) {
-                error_log("Failed to load clubs from $filePath: " . $e->getMessage());
-            }
-        }
+    private function mapClub(array $row) {
+        return [
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'category' => $row['category'],
+            'logo' => $row['logo'],
+            'banner' => $row['banner'],
+            'description' => $row['description'],
+        ];
     }
 
-    /**
-     * Get a single club by ID
-     * @param string $id Club ID
-     * @return array|null Club object or null if not found
-     */
     public function getClubById($id) {
-        foreach ($this->clubs as $club) {
-            if ($club['id'] === $id) {
-                return $club;
-            }
-        }
-        return null;
+        $stmt = $this->connection->prepare(
+            'SELECT id, name, category, logo, banner, description FROM public.clubs WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute([':id' => $id]);
+        $club = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $club ? $this->mapClub($club) : null;
     }
 
-    /**
-     * Get all clubs
-     * @return array All loaded clubs
-     */
     public function getAllClubs() {
-        return $this->clubs;
+        $stmt = $this->connection->query(
+            'SELECT id, name, category, logo, banner, description FROM public.clubs ORDER BY name ASC'
+        );
+
+        return array_map([$this, 'mapClub'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    /**
-     * Get clubs filtered by category
-     * @param string $category Club category
-     * @return array Array of clubs in the category or empty array
-     */
     public function getClubsByCategory($category) {
-        $result = [];
-        foreach ($this->clubs as $club) {
-            if ($club['category'] === $category) {
-                $result[] = $club;
-            }
-        }
-        return $result;
+        $stmt = $this->connection->prepare(
+            'SELECT id, name, category, logo, banner, description
+             FROM public.clubs
+             WHERE category = :category
+             ORDER BY name ASC'
+        );
+        $stmt->execute([':category' => $category]);
+
+        return array_map([$this, 'mapClub'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    /**
-     * Get all unique categories
-     * @return array Array of unique categories
-     */
     public function getAllCategories() {
-        $categories = [];
-        foreach ($this->clubs as $club) {
-            if (!in_array($club['category'], $categories)) {
-                $categories[] = $club['category'];
-            }
-        }
-        return $categories;
+        $stmt = $this->connection->query('SELECT DISTINCT category FROM public.clubs ORDER BY category ASC');
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(function ($row) {
+            return $row['category'];
+        }, $rows);
     }
 
-    /**
-     * Create a new club
-     * @param array $payload Club data
-     * @return array Created club
-     */
     public function createClub($payload) {
         if (!isset($payload['id'], $payload['name'], $payload['category'], $payload['description'])) {
             throw new Exception('Missing required fields');
         }
 
-        if ($this->getClubById($payload['id'])) {
-            throw new Exception('Club ID already exists');
+        $id = trim((string)$payload['id']);
+        $name = trim((string)$payload['name']);
+        $category = trim((string)$payload['category']);
+        $description = trim((string)$payload['description']);
+        $banner = trim((string)($payload['banner'] ?? ''));
+        $logo = trim((string)($payload['logo'] ?? ("../assets/images/{$id}/profile.jpg")));
+
+        $stmt = $this->connection->prepare(
+            'INSERT INTO public.clubs (id, name, category, logo, banner, description)
+             VALUES (:id, :name, :category, :logo, :banner, :description)
+             RETURNING id, name, category, logo, banner, description'
+        );
+
+        try {
+            $stmt->execute([
+                ':id' => $id,
+                ':name' => $name,
+                ':category' => $category,
+                ':logo' => $logo,
+                ':banner' => $banner,
+                ':description' => $description,
+            ]);
+        } catch (PDOException $e) {
+            if ((string)$e->getCode() === '23505') {
+                throw new Exception('Club ID or name already exists');
+            }
+            throw new Exception('Failed to create club in database', 0, $e);
         }
 
-        $club = [
-            'id' => $payload['id'],
-            'name' => $payload['name'],
-            'category' => $payload['category'],
-            'banner' => $payload['banner'] ?? '',
-            'description' => $payload['description']
-        ];
-
-        $this->clubs[] = $club;
-        $this->writeClubsToFile();
-        return $club;
+        return $this->mapClub($stmt->fetch(PDO::FETCH_ASSOC));
     }
 
-    /**
-     * Update an existing club
-     * @param string $id Club ID
-     * @param array $payload Updated data
-     * @return array Updated club
-     */
     public function updateClub($id, $payload) {
-        $club = $this->getClubById($id);
-        if (!$club) {
+        $existing = $this->getClubById($id);
+        if (!$existing) {
             throw new Exception('Club not found');
         }
 
         unset($payload['id']);
-        $updated = array_merge($club, $payload);
+        $updated = array_merge($existing, $payload);
 
-        foreach ($this->clubs as $index => $c) {
-            if ($c['id'] === $id) {
-                $this->clubs[$index] = $updated;
-                break;
+        $stmt = $this->connection->prepare(
+            'UPDATE public.clubs
+             SET name = :name,
+                 category = :category,
+                 logo = :logo,
+                 banner = :banner,
+                 description = :description,
+                 updated_at = NOW()
+             WHERE id = :id
+             RETURNING id, name, category, logo, banner, description'
+        );
+
+        try {
+            $stmt->execute([
+                ':id' => $id,
+                ':name' => $updated['name'],
+                ':category' => $updated['category'],
+                ':logo' => $updated['logo'] ?? $existing['logo'],
+                ':banner' => $updated['banner'] ?? $existing['banner'],
+                ':description' => $updated['description'],
+            ]);
+        } catch (PDOException $e) {
+            if ((string)$e->getCode() === '23505') {
+                throw new Exception('Club name already exists');
             }
+            throw new Exception('Failed to update club in database', 0, $e);
         }
 
-        $this->writeClubsToFile();
-        return $updated;
+        return $this->mapClub($stmt->fetch(PDO::FETCH_ASSOC));
     }
 
-    /**
-     * Delete a club
-     * @param string $id Club ID
-     * @return bool Success
-     */
     public function deleteClub($id) {
-        if (!$this->getClubById($id)) {
+        $stmt = $this->connection->prepare('DELETE FROM public.clubs WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+
+        if ($stmt->rowCount() === 0) {
             throw new Exception('Club not found');
         }
 
-        $this->clubs = array_values(array_filter($this->clubs, function ($club) use ($id) {
-            return $club['id'] !== $id;
-        }));
-
-        $this->writeClubsToFile();
         return true;
-    }
-
-    /**
-     * Write clubs to JSON file
-     */
-    private function writeClubsToFile() {
-        $filePath = $this->dataDir . 'clubs.json';
-        $encoded = json_encode($this->clubs, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
-        if ($encoded === false) {
-            throw new Exception('Failed to encode clubs JSON');
-        }
-
-        $result = file_put_contents($filePath, $encoded . PHP_EOL, LOCK_EX);
-        if ($result === false) {
-            throw new Exception('Failed to persist clubs file');
-        }
     }
 }

@@ -1,61 +1,41 @@
 <?php
 
-class EventManager {
-    private $events = [];
-    private $dataDir;
-    private $currentDate;
-    
-    // Mapping of club IDs to display names
-    private $clubIdToName = [
-        'acm' => 'ACM',
-        'jci' => 'JCI',
-        'ieee' => 'IEEE',
-        'cine_radio' => 'Cine Radio',
-        'securinets' => 'Securinets',
-        'junior' => 'Junior',
-        'aerobotix' => 'Aerobotix',
-        'theatro' => 'Theatro',
-        '3zero' => '3ZERO',
-        'android' => 'Android Club',
-        'genesis_labs' => 'Genesis Labs',
-        'insat_press' => 'INSAT Press'
-    ];
+require_once 'Database.php';
 
-    private $clubNameToId = [];
+class EventManager {
+    private $connection;
+    private $currentDate;
 
     public function __construct() {
-        $this->dataDir = __DIR__ . '/../data/';
+        $this->connection = Database::connect();
         $this->currentDate = date('Y-m-d');
-        $this->clubNameToId = array_change_key_case(array_flip($this->clubIdToName), CASE_LOWER);
-        $this->loadEventsFromFiles();
     }
 
-    /**
-     * Load all events from JSON files in the data directory
-     */
-    private function loadEventsFromFiles() {
-        $this->events = [];
+    private function getEventStatus($eventDate, $eventTime) {
+        $currentDateTime = strtotime($this->currentDate . ' 00:00:00');
+        $eventDateTime = strtotime($eventDate . ' ' . $eventTime);
+        return $eventDateTime > $currentDateTime ? 'published' : 'finished';
+    }
 
-        foreach ($this->clubIdToName as $clubId => $clubName) {
-            $filePath = $this->dataDir . $clubId . '_events.json';
-            
-            if (file_exists($filePath)) {
-                try {
-                    $jsonContent = file_get_contents($filePath);
-                    $eventsData = json_decode($jsonContent, true);
-                    
-                    if (is_array($eventsData)) {
-                        foreach ($eventsData as $event) {
-                            // Add computed status field
-                            $event['status'] = $this->getEventStatus($event['date'], $event['time']);
-                            $this->events[] = $event;
-                        }
-                    }
-                } catch (Exception $e) {
-                    error_log("Failed to load events from $filePath: " . $e->getMessage());
-                }
-            }
-        }
+    private function mapEvent(array $row) {
+        $date = substr((string)$row['event_date'], 0, 10);
+        $time = substr((string)$row['event_time'], 0, 5);
+
+        return [
+            'id' => (int)$row['id'],
+            'title' => $row['title'],
+            'club' => $row['club'],
+            'clubLogo' => $row['club_logo'] ?? '',
+            'image' => $row['image'],
+            'date' => $date,
+            'time' => $time,
+            'location' => $row['location'],
+            'description' => $row['description'],
+            'participants' => (int)$row['participants'],
+            'maxParticipants' => (int)$row['max_participants'],
+            'featured' => (bool)$row['featured'],
+            'status' => $this->getEventStatus($date, $time),
+        ];
     }
 
     private function resolveClubId($clubName) {
@@ -63,149 +43,89 @@ class EventManager {
             return null;
         }
 
-        $normalizedName = strtolower(trim($clubName));
-        return $this->clubNameToId[$normalizedName] ?? null;
+        $clubName = trim($clubName);
+
+        $stmt = $this->connection->prepare(
+            'SELECT id
+             FROM public.clubs
+             WHERE LOWER(name) = LOWER(:club_name)
+             LIMIT 1'
+        );
+        $stmt->execute([
+            ':club_name' => $clubName
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? $row['id'] : null;
     }
 
-    private function readClubEvents($clubId) {
-        $filePath = $this->dataDir . $clubId . '_events.json';
+    private function fetchEvents($whereClause = '', $params = []) {
+        $query = '
+            SELECT
+                e.id,
+                e.title,
+                c.name AS club,
+                c.logo AS club_logo,
+                e.image,
+                e.event_date,
+                e.event_time,
+                e.location,
+                e.description,
+                e.participants,
+                e.max_participants,
+                e.featured
+            FROM public.events e
+            INNER JOIN public.clubs c ON c.id = e.club_id
+        ';
 
-        if (!file_exists($filePath)) {
-            return [];
+        if ($whereClause !== '') {
+            $query .= ' WHERE ' . $whereClause;
         }
 
-        $content = file_get_contents($filePath);
-        if ($content === false || trim($content) === '') {
-            return [];
-        }
+        $query .= ' ORDER BY e.event_date DESC, e.event_time DESC, e.id DESC';
 
-        $decoded = json_decode($content, true);
-        return is_array($decoded) ? $decoded : [];
+        $stmt = $this->connection->prepare($query);
+        $stmt->execute($params);
+
+        return array_map([$this, 'mapEvent'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
-    private function writeClubEvents($clubId, $events) {
-        $filePath = $this->dataDir . $clubId . '_events.json';
-        $encoded = json_encode($events, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-
-        if ($encoded === false) {
-            throw new Exception('Failed to encode events JSON');
-        }
-
-        $result = file_put_contents($filePath, $encoded . PHP_EOL, LOCK_EX);
-        if ($result === false) {
-            throw new Exception('Failed to persist events file');
-        }
-    }
-
-    private function getNextEventId() {
-        $maxId = 0;
-        foreach ($this->events as $event) {
-            if (isset($event['id']) && is_numeric($event['id'])) {
-                $maxId = max($maxId, (int)$event['id']);
-            }
-        }
-        return $maxId + 1;
-    }
-
-
-
-    /**
-     * Calculate event status based on current date and event date/time
-     * Status values: "pending", "published", "finished", "history" (for now only finished and published are implemented)
-     */
-    private function getEventStatus($eventDate, $eventTime) {
-        $currentDateTime = strtotime($this->currentDate . ' 00:00:00');
-        $eventDateTime = strtotime($eventDate . ' ' . $eventTime);
-        
-        if ($eventDateTime > $currentDateTime) {
-            // Event is in the future
-            return 'published';
-        } else {
-            // Event is in the past
-            return 'finished';
-        }
-    }
-
-    /**
-     * Get a single event by ID
-     * @param int $id Event ID
-     * @return array|null Event object or null if not found
-     */
     public function getEventById($id) {
-        foreach ($this->events as $event) {
-            if ($event['id'] == $id) {
-                return $event;
-            }
-        }
-        return null;
+        $events = $this->fetchEvents('e.id = :id', [':id' => (int)$id]);
+        return $events[0] ?? null;
     }
 
-    /**
-     * Get all events for a specific club
-     * @param string $club Club name
-     * @return array Array of events for the club or empty array
-     */
     public function getEventsByClub($club) {
-        $result = [];
-        foreach ($this->events as $event) {
-            if ($event['club'] === $club) {
-                $result[] = $event;
-            }
+        $clubId = $this->resolveClubId($club);
+        if ($clubId === null) {
+            return [];
         }
-        return $result;
+
+        return $this->fetchEvents('e.club_id = :club_id', [':club_id' => $clubId]);
     }
 
-    /**
-     * Get events for a specific club filtered by status
-     * @param string $club Club name
-     * @param string $status Event status (pending, published, finished, history)
-     * @return array Array of filtered events or empty array
-     */
     public function getEventsByClubAndStatus($club, $status) {
-        $result = [];
-        foreach ($this->events as $event) {
-            if ($event['club'] === $club && $event['status'] === $status) {
-                $result[] = $event;
-            }
-        }
-        return $result;
+        $events = $this->getEventsByClub($club);
+
+        return array_values(array_filter($events, function ($event) use ($status) {
+            return $event['status'] === $status;
+        }));
     }
 
-    /**
-     * Get all events (useful for debugging or dashboard views)
-     * @return array All loaded events
-     */
     public function getAllEvents() {
-        return $this->events;
+        return $this->fetchEvents();
     }
 
-    /**
-     * Get all events with a specific status
-     * @param string $status Event status
-     * @return array Events matching the status
-     */
     public function getEventsByStatus($status) {
-        $result = [];
-        foreach ($this->events as $event) {
-            if ($event['status'] === $status) {
-                $result[] = $event;
-            }
-        }
-        return $result;
+        $events = $this->getAllEvents();
+
+        return array_values(array_filter($events, function ($event) use ($status) {
+            return $event['status'] === $status;
+        }));
     }
 
-    /**
-     * Get featured events across all clubs
-     * @return array Featured events
-     */
     public function getFeaturedEvents() {
-        $result = [];
-        foreach ($this->events as $event) {
-            if (isset($event['featured']) && $event['featured'] === true) {
-                $result[] = $event;
-            }
-        }
-        return $result;
+        return $this->fetchEvents('e.featured = TRUE');
     }
 
     public function createEvent($payload) {
@@ -218,27 +138,47 @@ class EventManager {
             throw new Exception('Invalid club name');
         }
 
-        $event = [
-            'id' => $this->getNextEventId(),
-            'title' => $payload['title'],
-            'club' => $payload['club'],
-            'clubLogo' => $payload['clubLogo'] ?? '',
-            'image' => $payload['image'] ?? '',
-            'date' => $payload['date'],
-            'time' => $payload['time'],
-            'location' => $payload['location'],
-            'description' => $payload['description'],
-            'participants' => $payload['participants'] ?? 0,
-            'maxParticipants' => $payload['maxParticipants'] ?? 0,
-            'featured' => $payload['featured'] ?? false
-        ];
+        $stmt = $this->connection->prepare(
+            'INSERT INTO public.events (
+                club_id,
+                title,
+                image,
+                event_date,
+                event_time,
+                location,
+                description,
+                participants,
+                max_participants,
+                featured
+             ) VALUES (
+                :club_id,
+                :title,
+                :image,
+                :event_date,
+                :event_time,
+                :location,
+                :description,
+                :participants,
+                :max_participants,
+                :featured
+             ) RETURNING id'
+        );
 
-        $events = $this->readClubEvents($clubId);
-        $events[] = $event;
-        $this->writeClubEvents($clubId, $events);
+        $stmt->execute([
+            ':club_id' => $clubId,
+            ':title' => $payload['title'],
+            ':image' => $payload['image'] ?? '',
+            ':event_date' => $payload['date'],
+            ':event_time' => $payload['time'],
+            ':location' => $payload['location'],
+            ':description' => $payload['description'],
+            ':participants' => (int)($payload['participants'] ?? 0),
+            ':max_participants' => (int)($payload['maxParticipants'] ?? 0),
+            ':featured' => (bool)($payload['featured'] ?? false),
+        ]);
 
-        $this->loadEventsFromFiles();
-        return $this->getEventById($event['id']);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->getEventById($row['id']);
     }
 
     public function updateEvent($id, $payload) {
@@ -247,50 +187,53 @@ class EventManager {
             throw new Exception('Invalid event ID');
         }
 
-        $existingEvent = $this->getEventById($eventId);
-        if (!$existingEvent) {
+        $existing = $this->getEventById($eventId);
+        if (!$existing) {
             throw new Exception('Event not found');
         }
 
-        unset($payload['id'], $payload['status']);
-        $existingWithoutComputed = $existingEvent;
-        unset($existingWithoutComputed['status']);
-        $updatedEvent = array_merge($existingWithoutComputed, $payload);
+        unset($payload['id'], $payload['status'], $payload['clubLogo']);
+        $updated = array_merge($existing, $payload);
 
-        $oldClubId = $this->resolveClubId($existingEvent['club']);
-        $newClubId = $this->resolveClubId($updatedEvent['club']);
-
-        if ($oldClubId === null || $newClubId === null) {
-            throw new Exception('Invalid club mapping');
+        $clubId = $this->resolveClubId($updated['club']);
+        if ($clubId === null) {
+            throw new Exception('Invalid club name');
         }
 
-        $oldClubEvents = $this->readClubEvents($oldClubId);
-        $newClubEvents = ($oldClubId === $newClubId) ? $oldClubEvents : $this->readClubEvents($newClubId);
+        $stmt = $this->connection->prepare(
+            'UPDATE public.events
+             SET club_id = :club_id,
+                 title = :title,
+                 image = :image,
+                 event_date = :event_date,
+                 event_time = :event_time,
+                 location = :location,
+                 description = :description,
+                 participants = :participants,
+                 max_participants = :max_participants,
+                 featured = :featured,
+                 updated_at = NOW()
+             WHERE id = :id'
+        );
 
-        $found = false;
-        foreach ($oldClubEvents as $index => $clubEvent) {
-            if (isset($clubEvent['id']) && (int)$clubEvent['id'] === $eventId) {
-                if ($oldClubId === $newClubId) {
-                    $oldClubEvents[$index] = $updatedEvent;
-                } else {
-                    array_splice($oldClubEvents, $index, 1);
-                    $newClubEvents[] = $updatedEvent;
-                }
-                $found = true;
-                break;
-            }
+        $stmt->execute([
+            ':id' => $eventId,
+            ':club_id' => $clubId,
+            ':title' => $updated['title'],
+            ':image' => $updated['image'] ?? '',
+            ':event_date' => $updated['date'],
+            ':event_time' => $updated['time'],
+            ':location' => $updated['location'],
+            ':description' => $updated['description'],
+            ':participants' => (int)($updated['participants'] ?? 0),
+            ':max_participants' => (int)($updated['maxParticipants'] ?? 0),
+            ':featured' => (bool)($updated['featured'] ?? false),
+        ]);
+
+        if ($stmt->rowCount() === 0) {
+            throw new Exception('Event not found');
         }
 
-        if (!$found) {
-            throw new Exception('Event not found in source file');
-        }
-
-        $this->writeClubEvents($oldClubId, $oldClubEvents);
-        if ($oldClubId !== $newClubId) {
-            $this->writeClubEvents($newClubId, $newClubEvents);
-        }
-
-        $this->loadEventsFromFiles();
         return $this->getEventById($eventId);
     }
 
@@ -300,30 +243,13 @@ class EventManager {
             throw new Exception('Invalid event ID');
         }
 
-        $existingEvent = $this->getEventById($eventId);
-        if (!$existingEvent) {
+        $stmt = $this->connection->prepare('DELETE FROM public.events WHERE id = :id');
+        $stmt->execute([':id' => $eventId]);
+
+        if ($stmt->rowCount() === 0) {
             throw new Exception('Event not found');
         }
 
-        $clubId = $this->resolveClubId($existingEvent['club']);
-        if ($clubId === null) {
-            throw new Exception('Invalid club mapping');
-        }
-
-        $events = $this->readClubEvents($clubId);
-        $initialCount = count($events);
-
-        $events = array_values(array_filter($events, function ($event) use ($eventId) {
-            return !(isset($event['id']) && (int)$event['id'] === $eventId);
-        }));
-
-        if (count($events) === $initialCount) {
-            throw new Exception('Event not found in data file');
-        }
-
-        $this->writeClubEvents($clubId, $events);
-
-        $this->loadEventsFromFiles();
         return true;
     }
 }
