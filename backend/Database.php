@@ -15,14 +15,14 @@ class Database {
         }
 
         $host = self::getRequiredEnv('DATABASE_HOST');
-        $port = getenv('DATABASE_PORT') ?: '5432';
-        $dbname = getenv('DATABASE_NAME') ?: 'postgres';
+        $port = self::getOptionalEnv('DATABASE_PORT', '5432');
+        $dbname = self::getOptionalEnv('DATABASE_NAME', 'postgres');
         $user = self::getRequiredEnv('DATABASE_USER');
         $password = self::getRequiredEnv('DATABASE_PASSWORD');
-        $sslmode = getenv('SUPABASE_DB_SSLMODE') ?: 'require';
+        $sslmode = self::getOptionalEnv('SUPABASE_DB_SSLMODE', 'require');
 
         $dsn = sprintf(
-            'pgsql:host=%s;port=%s;dbname=%s;sslmode=%s',
+            'pgsql:host=%s;port=%s;dbname=%s;sslmode=%s;application_name=INSATivity',
             $host,
             $port,
             $dbname,
@@ -48,10 +48,16 @@ class Database {
     # t chargilek environment variable li hajtek biha
     private static function getRequiredEnv($key) {
         $value = getenv($key);
-        if ($value === false || trim($value) === '') {
+        if ($value === false || trim((string)$value) === '') {
             throw new Exception("Missing required environment variable: {$key}");
         }
         return $value;
+    }
+
+    # Get optional environment variable with a default fallback
+    private static function getOptionalEnv($key, $default = '') {
+        $value = getenv($key);
+        return $value !== false ? $value : $default;
     }
 
     # y chargi l environment variables mel .env w y injectihom fel superglobals
@@ -62,8 +68,21 @@ class Database {
         }
 
         try {
-            self::$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+            $projectRoot = __DIR__ . '/..';
+            $envFile = $projectRoot . '/.env';
+            
+            if (!file_exists($envFile)) {
+                throw new Exception("Environment file not found at: {$envFile}");
+            }
+
+            self::$dotenv = Dotenv::createImmutable($projectRoot);
             self::$dotenv->load();
+            
+            // Dotenv loads into $_ENV but not into the environment/getenv()
+            // Explicitly populate getenv() for consistency
+            foreach ($_ENV as $key => $value) {
+                putenv("{$key}={$value}");
+            }
         } catch (\Exception $e) {
             throw new Exception('Failed to load environment variables: ' . $e->getMessage());
         }
