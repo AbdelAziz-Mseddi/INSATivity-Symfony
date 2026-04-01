@@ -5,7 +5,7 @@ require_once 'AuthManager.php';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo '<h3>Method Not Allowed</h3>';
-    echo "<a href='../pages/register.html'>Go Back</a>";
+    echo "<a href='../pages/login.html'>GO BACK, PEASANT!</a>";
     exit;
 }
 
@@ -78,13 +78,13 @@ try {
     ];
 
     echo "<h3 style='color:green;'>Registration successful!</h3>";
-    echo "<p>Welcome, {$user['full_name']}.</p>";
-    echo "<p>Account created for {$user['email']}.</p>";
+    echo '<p>Welcome, ' . $user['full_name'] . '.</p>';
+    echo '<p>Account created for ' . $user['email'] . '.</p>';
     echo "<a href='../pages/login.html'>Continue to Login</a>";
 } catch (Exception $e) {
     http_response_code(400);
     echo '<h3>Registration failed:</h3>';
-    echo "<p style='color:red;'>{$e->getMessage()}</p>";
+    echo '<p style="color:red;">' . $e->getMessage() . '</p>';
     echo "<a href='../pages/register.html'>Go Back</a>";
 }
 
