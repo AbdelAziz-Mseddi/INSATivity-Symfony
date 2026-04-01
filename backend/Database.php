@@ -7,12 +7,11 @@ use Dotenv\Dotenv;
 class Database {
     private static $dotenv;
 
-    # za bluetooth devize iz connected suczessfully
     public static function connect() {
         self::loadEnvironment();
 
-        if (!function_exists('pg_connect')) {
-            throw new Exception('PostgreSQL extension is not enabled in PHP. Install/enable pgsql and pdo_pgsql.');
+        if (!class_exists('PDO') || !in_array('pgsql', PDO::getAvailableDrivers(), true)) {
+            throw new Exception('PDO PostgreSQL driver is not enabled in PHP. Install/enable pdo_pgsql.');
         }
 
         $host = self::getRequiredEnv('DATABASE_HOST');
@@ -22,21 +21,25 @@ class Database {
         $password = self::getRequiredEnv('DATABASE_PASSWORD');
         $sslmode = getenv('SUPABASE_DB_SSLMODE') ?: 'require';
 
-        $connectionString = sprintf(
-            "host='%s' port='%s' dbname='%s' user='%s' password='%s' sslmode='%s'",
-            self::escapeConnectionValue($host),
-            self::escapeConnectionValue($port),
-            self::escapeConnectionValue($dbname),
-            self::escapeConnectionValue($user),
-            self::escapeConnectionValue($password),
-            self::escapeConnectionValue($sslmode)
+        $dsn = sprintf(
+            'pgsql:host=%s;port=%s;dbname=%s;sslmode=%s',
+            $host,
+            $port,
+            $dbname,
+            $sslmode
         );
 
-        $connection = pg_connect($connectionString);
-        if (!$connection) {
-            $error = pg_last_error();
-            $errorMsg = $error ? $error : 'Unknown connection error';
-            throw new Exception('Failed to connect to Supabase Postgres: ' . $errorMsg);
+        try {
+            $connection = new PDO($dsn, $user, $password, [
+                # This tells PDO to throw exceptions when something fails (bad SQL, connection issue, constraint violation), instead of silently returning false.
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                # This makes fetch() return rows as associative arrays by default, instead of numeric-index arrays.
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                # This forces real prepared statements at the PostgreSQL server level (not emulated by PHP), stricter and more accurate with types and SQL semantics.
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            throw new Exception('Failed to connect to Supabase Postgres: ' . $e->getMessage());
         }
 
         return $connection;
@@ -49,14 +52,6 @@ class Database {
             throw new Exception("Missing required environment variable: {$key}");
         }
         return $value;
-    }
-
-    # str_replace(search, replace, subject)
-    # finds every occurrence of search in subject and replaces it with replace
-    # treating \ and ' as literal characters in the password, not syntax delimiters
-    # every \ found → replaced with \\ & every ' found → replaced with \'
-    private static function escapeConnectionValue($value) {
-        return str_replace(["\\", "'"], ["\\\\", "\\'"], $value);
     }
 
     # y chargi l environment variables mel .env w y injectihom fel superglobals
