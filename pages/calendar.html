@@ -36,14 +36,6 @@
       <h1>Event Schedule</h1>
       <div class="search-filter-wrapper">
         <input type="text" class="search-bar" placeholder="Search events, clubs, categories…" id="calSearch" />
-        <!-- Global "Add Event" button -->
-        <button class="btn btn-gold btn-add-global" id="btnGlobalAdd">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Add Event
-        </button>
       </div>
     </div>
 
@@ -99,96 +91,18 @@
     <div class="modal-card day-panel-card" id="dayPanel">
       <div class="modal-header">
         <h3 class="day-panel-title" id="dayPanelTitle">—</h3>
-        <div class="day-panel-actions">
-          <button class="btn btn-gold btn-sm" id="btnAddEvent">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Add Event
-          </button>
-          <button class="icon-btn icon-btn-close" id="btnClosePanel" aria-label="Close panel">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="day-panel-list" id="dayPanelList"></div>
-    </div>
-  </div>
-
-  <!-- ───────────────────────── ADD-EVENT MODAL ───────────────────────── -->
-  <div class="modal-overlay" id="eventModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="modalTitle">Add New Event</h3>
-        <button class="icon-btn icon-btn-close" id="btnCloseModal" aria-label="Close">
+        <button class="icon-btn icon-btn-close" id="btnClosePanel" aria-label="Close panel">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </div>
-
-      <form class="modal-form" id="modalForm" novalidate>
-        <label class="form-label" for="fTitle">Event Title <span class="required">*</span></label>
-        <input class="form-input" id="fTitle" type="text" placeholder="e.g. Chess Club Meeting" required />
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="fDate">Date <span class="required">*</span></label>
-            <input class="form-input" id="fDate" type="date" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="fTime">Time</label>
-            <input class="form-input" id="fTime" type="time" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="fCategory">Category</label>
-            <select class="form-input form-select" id="fCategory">
-              <option value="academic">📚 Academic</option>
-              <option value="sports">⚽ Sports</option>
-              <option value="culture">🎨 Culture</option>
-              <option value="career">💼 Career</option>
-              <option value="social">🎉 Social</option>
-              <option value="other">📌 Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="fLocation">Location</label>
-            <input class="form-input" id="fLocation" type="text" placeholder="e.g. Hall A" />
-          </div>
-        </div>
-
-        <label class="form-label" for="fDescription">Description</label>
-        <textarea class="form-input form-textarea" id="fDescription" rows="3"
-          placeholder="Brief event details…"></textarea>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-ghost" id="btnCancelModal">Cancel</button>
-          <button type="submit" class="btn btn-gold">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            Save Event
-          </button>
-        </div>
-      </form>
+      <div class="day-panel-list" id="dayPanelList"></div>
     </div>
   </div>
 
   <script src="../scripts/calendar.js"></script>
-  <script>
-    // Wire cancel button
-    document.getElementById('btnCancelModal').addEventListener('click', () => {
-      document.getElementById('eventModal').classList.remove('open');
-    });
-  </script>
 </body>
 
 </html>

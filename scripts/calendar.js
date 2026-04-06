@@ -42,12 +42,7 @@ const dayPanel = $('dayPanel');
 const dayPanelOverlay = $('dayPanelOverlay');
 const dayPanelTitle = $('dayPanelTitle');
 const dayPanelList = $('dayPanelList');
-const btnAddEvent = $('btnAddEvent');
 const btnClosePanel = $('btnClosePanel');
-const modal = $('eventModal');
-const modalTitle = $('modalTitle');
-const modalForm = $('modalForm');
-const btnCloseModal = $('btnCloseModal');
 const searchBar = document.querySelector('.search-bar');
 const featuredList = $('featuredList');
 
@@ -55,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
     renderFeatured();
     bindControls();
-    bindModal();
     bindDayPanel();
     bindSearch();
 });
@@ -69,9 +63,7 @@ function loadStorage() {
     }
 }
 
-function saveEvents() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-}
+
 
 function renderCalendar() {
     const { year, month } = current;
@@ -169,10 +161,9 @@ function openDayPanel(year, month, day) {
     const dow = new Date(year, month, day).getDay();
 
     dayPanelTitle.textContent = `${DAYS[dow]}, ${MONTHS[month]} ${day}, ${year}`;
-    btnAddEvent.dataset.date = dateStr;
 
     if (dayEvts.length === 0) {
-        dayPanelList.innerHTML = `<p class="no-events-msg">No events scheduled.<br>Click <strong>+ Add Event</strong> to create one.</p>`;
+        dayPanelList.innerHTML = `<p class="no-events-msg">No events scheduled.</p>`;
     } else {
         const frag = document.createDocumentFragment();
         dayEvts.forEach(evt => {
@@ -186,22 +177,11 @@ function openDayPanel(year, month, day) {
                     <span class="agenda-name">${evt.title}</span>
                     ${evt.location ? `<span class="agenda-loc">📍 ${evt.location}</span>` : ''}
                     ${evt.description ? `<p class="agenda-desc">${evt.description}</p>` : ''}
-                </div>
-                <button class="agenda-delete" data-id="${evt.id}" title="Delete event">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6l-1 14H6L5 6"/>
-                        <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
-                    </svg>
-                </button>`;
+                </div>`;
             frag.appendChild(item);
         });
         dayPanelList.innerHTML = '';
         dayPanelList.appendChild(frag);
-
-        dayPanelList.querySelectorAll('.agenda-delete').forEach(btn =>
-            btn.addEventListener('click', e => { e.stopPropagation(); deleteEvent(btn.dataset.id); })
-        );
     }
 
     dayPanelOverlay.classList.add('open');
@@ -269,64 +249,9 @@ function renderFeatured(filter = '') {
     featuredList.appendChild(frag);
 }
 
-function openModal(dateStr = '') {
-    $('fTitle').value = '';
-    $('fDate').value = dateStr;
-    $('fTime').value = '';
-    $('fCategory').value = 'academic';
-    $('fLocation').value = '';
-    $('fDescription').value = '';
-    modalTitle.textContent = dateStr
-        ? `Add Event — ${new Date(dateStr + 'T00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
-        : 'Add New Event';
-    modal.classList.add('open');
-    $('fTitle').focus();
-}
 
-function closeModal() { modal.classList.remove('open'); }
 
-function bindModal() {
-    btnCloseModal.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-    $('btnCancelModal').addEventListener('click', closeModal);
 
-    modalForm.addEventListener('submit', e => {
-        e.preventDefault();
-        const title = $('fTitle').value.trim();
-        const date = $('fDate').value;
-        if (!title || !date) return;
-
-        const newEvt = {
-            id: 'e' + Date.now(),
-            title,
-            date,
-            time: $('fTime').value,
-            category: $('fCategory').value,
-            location: $('fLocation').value.trim(),
-            description: $('fDescription').value.trim(),
-        };
-        events.push(newEvt);
-        saveEvents();
-        closeModal();
-
-        const d = new Date(date + 'T00:00');
-        current = { year: d.getFullYear(), month: d.getMonth() };
-        renderFeatured();
-        selectDay(d.getFullYear(), d.getMonth(), d.getDate());
-    });
-
-    btnAddEvent.addEventListener('click', () => openModal(btnAddEvent.dataset.date || ''));
-}
-
-function deleteEvent(id) {
-    events = events.filter(e => e.id !== id);
-    saveEvents();
-    renderFeatured();
-    if (selected) {
-        renderCalendar();
-        openDayPanel(selected.year, selected.month, selected.day);
-    }
-}
 
 function bindControls() {
     btnPrev.addEventListener('click', () => {
@@ -346,7 +271,7 @@ function bindControls() {
     });
 
     btnClosePanel.addEventListener('click', closeDayPanel);
-    $('btnGlobalAdd').addEventListener('click', () => openModal(''));
+
 }
 
 function bindSearch() {
