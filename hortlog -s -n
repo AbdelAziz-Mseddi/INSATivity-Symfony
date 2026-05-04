@@ -1,0 +1,55 @@
+* [33m29afce9[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m better interface for upcoming events and featered events
+* [33mc537d52[m improved page headers and navigation elements
+* [33m480519c[m adding hover effect to events page
+[31m|[m * [33mb20024d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mphp_implementation[m[33m, [m[1;31morigin/php_implementation[m[33m)[m better readability + top-tier darija comments
+[31m|[m * [33ma3d1e5f[m updated readme
+[31m|[m * [33mcdaa408[m dynamic club dashboard rendering + club-dashboard scripts restructured
+[31m|[m * [33mdf17753[m linked backend to frontend (event creation + club navigation)
+[31m|[m * [33m0074a86[m completed club CRUD
+[31m|[m * [33m9cc5ddb[m media upload functionality
+[31m|[m * [33mdb304e5[m full CRUD for events
+[31m|[m * [33m709fb6e[m linked the clubs page to php
+[31m|[m * [33mc10558e[m added GET method + linked js to php
+[31m|[m * [33mcebc55a[m linked register
+[31m|[m * [33ma4c16a8[m initial backend to validate register/login forms
+[31m|[m[31m/[m  
+* [33ma9e2e37[m making calendar design better
+* [33m0473927[m making calendar interactive
+* [33m0c944d9[m unified the header, finally
+* [33m4e69d88[m new name
+* [33m193abf9[m events' file for each club
+* [33m85cc386[m centralized all events in json + upcoming events are filtered
+* [33m4c7ff30[m clubs are centralized in one file and rendered by js + filter by tag
+* [33m2f75ce8[m updated events page layout
+* [33m3822540[m aesthetic background with stars
+* [33m9e6cee7[m updated background images for register/login + retracked media
+* [33m17889f2[m better formatting for files
+* [33ma76ac63[m modified gitignore + untracked media
+* [33madc31b6[m added clubs and updated assets structure
+* [33mad97a17[m Better calendar design
+[32m|[m * [33m0bdc8b1[m[33m ([m[1;31morigin/tafwira[m[33m)[m restyling event page
+[32m|[m[32m/[m  
+* [33m9b9e199[m un peu d'ordre
+* [33mf601962[m updated done and community feedback pages
+* [33m627fb52[m enhanced readability of styling code
+* [33m048d314[m added history and done sections
+* [33m4968f90[m added new section
+* [33m484d42b[m added pending events section
+* [33mbec1e01[m changement du goal
+* [33m3934f93[m added section for community feedback
+* [33m2882927[m better hovering transition
+* [33mb3922e1[m added creating event section + changed sections
+* [33m074dd53[m home page for club pattern
+* [33m799eb38[m initial club dashboard
+*   [33mb54f625[m Merge branch 'main' of https://github.com/AbdelAziz-Mseddi/Web-Dev-Project
+[34m|[m[35m\[m  
+[34m|[m * [33m567fc77[m hompeage temp version
+[34m|[m * [33m1ec36b9[m modification de event
+* [35m|[m [33m8bdee81[m added clubs page and updated style(page.css)
+[35m|[m[35m/[m  
+* [33mbb5e767[m Added login/register pages and updated styles with uni theme
+* [33m0bfd9c9[m updated header
+* [33m1ee4cb9[m Implementing Calendar layout
+* [33m73b4945[m added gitignore
+* [33ma97f16b[m little fix
+* [33m5736dbb[m initial commit

@@ -1,84 +1,90 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Event</title>
-    <link rel="stylesheet" href="../styles/event.css" />
-    <link rel="stylesheet" href="../styles/base.css" />
-    <link rel="stylesheet" href="../styles/layout.css" />
-    <link rel="stylesheet" href="../styles/components.css" />
-  </head>
-  <body>
-    <header class="main-header">
-      <div class="nav-container">
-        <div class="logo">UniEvents</div>
-        <nav class="main-nav">
-          <a href="index.html" class="nav-link active">Events</a>
-          <a href="calendar.html" class="nav-link">Calendar</a>
-          <a href="clubs.html" class="nav-link">Clubs</a>
-        </nav>
-        <div class="header-actions">
-          <img class="profile-avatar" src="../assets/icons/search.svg" />
-          <img class="profile-avatar" src="../assets/icons/notifications.svg" />
-          <img class="profile-avatar" src="../assets/icons/user.svg" />
-        </div>
-      </div>
-    </header>
-    <div class="image_side" id="eventImage"></div>
-    <div class="content_side">
-      <section class="left">
-        <header>
-          <h1 id="eventTitle">NAME OF THE EVENT</h1>
-          <p id="eventClub">name of the club</p>
-        </header>
-        <p><strong>📅 Date :</strong> <span id="eventDate">date</span></p>
-        <p><strong>⏰Heure :</strong> <span id="eventTime">time</span></p>
-        <p><strong>📍Lieu :</strong> <span id="eventLocation">place</span></p>
-        <p><strong>📖description:</strong> <span id="eventDescription">texte</span></p>
-      </section>
-      <section class="right">
-        <div class="participants-line">
-          <div class="progress" id="eventProgress" style="width: 60%">30 / 50 participants</div>
-        </div>
 
-        <button class="reg">Register now</button><br />
-        <button>add to calender</button><br />
-        <button>share event</button><br />
-      </section>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event</title>
+  <link rel="stylesheet" href="../styles/event.css" />
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/layout.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+</head>
+
+<body>
+  <header class="main-header">
+    <div class="nav-container">
+      <div class="logo">UniEvents</div>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link active">Events</a>
+        <a href="calendar.html" class="nav-link">Calendar</a>
+        <a href="clubs.html" class="nav-link">Clubs</a>
+      </nav>
+      <div class="header-actions">
+        <img class="profile-avatar" src="../assets/icons/search.svg" />
+        <img class="profile-avatar" src="../assets/icons/notifications.svg" />
+        <img class="profile-avatar" src="../assets/icons/user.svg" />
+        <a href="../backend/logout.php" class="logout-link" title="Logout" aria-label="Logout">
+          <img class="profile-avatar" src="../assets/icons/logout.png" alt="Logout" />
+        </a>
+      </div>
     </div>
-    <script>
-      // Load event details from sessionStorage
-      document.addEventListener("DOMContentLoaded", () => {
-        const eventData = sessionStorage.getItem("currentEvent");
-        if (eventData) {
-          const event = JSON.parse(eventData);
-          
-          // Update event details
-          document.getElementById("eventTitle").textContent = event.title;
-          document.getElementById("eventClub").textContent = event.club;
-          document.getElementById("eventDate").textContent = new Date(event.date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
-          document.getElementById("eventTime").textContent = event.time;
-          document.getElementById("eventLocation").textContent = event.location;
-          document.getElementById("eventDescription").textContent = event.description;
-          
-          // Update participants progress
-          const progressPercent = (event.participants / event.maxParticipants) * 100;
-          const progressEl = document.getElementById("eventProgress");
-          progressEl.style.width = progressPercent + "%";
-          progressEl.textContent = `${event.participants} / ${event.maxParticipants} participants`;
-          
-          // Set background image
-          const imageDiv = document.getElementById("eventImage");
-          imageDiv.style.backgroundImage = `url('${event.image}')`;
-          imageDiv.style.backgroundSize = "cover";
-          imageDiv.style.backgroundPosition = "center";
-        }
-      });
-    </script>
-  </body>
+  </header>
+  <div class="image_side" id="eventImage"></div>
+  <div class="content_side">
+    <section class="left">
+      <header>
+        <h1 id="eventTitle">NAME OF THE EVENT</h1>
+        <p id="eventClub">name of the club</p>
+      </header>
+      <p><strong>📅 Date :</strong> <span id="eventDate">date</span></p>
+      <p><strong>⏰Heure :</strong> <span id="eventTime">time</span></p>
+      <p><strong>📍Lieu :</strong> <span id="eventLocation">place</span></p>
+      <p><strong>📖description:</strong> <span id="eventDescription">texte</span></p>
+    </section>
+    <section class="right">
+      <div class="participants-line">
+        <div class="progress" id="eventProgress" style="width: 60%">30 / 50 participants</div>
+      </div>
+
+      <button class="reg">Register now</button><br />
+      <button>add to calender</button><br />
+      <button>share event</button><br />
+    </section>
+  </div>
+  <script>
+    // Load event details from sessionStorage
+    document.addEventListener("DOMContentLoaded", () => {
+      const eventData = sessionStorage.getItem("currentEvent");
+      if (eventData) {
+        const event = JSON.parse(eventData);
+
+        // Update event details
+        document.getElementById("eventTitle").textContent = event.title;
+        document.getElementById("eventClub").textContent = event.club;
+        document.getElementById("eventDate").textContent = new Date(event.date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        document.getElementById("eventTime").textContent = event.time;
+        document.getElementById("eventLocation").textContent = event.location;
+        document.getElementById("eventDescription").textContent = event.description;
+
+        // Update participants progress
+        const progressPercent = (event.participants / event.maxParticipants) * 100;
+        const progressEl = document.getElementById("eventProgress");
+        progressEl.style.width = progressPercent + "%";
+        progressEl.textContent = `${event.participants} / ${event.maxParticipants} participants`;
+
+        // Set background image
+        const imageDiv = document.getElementById("eventImage");
+        imageDiv.style.backgroundImage = `url('${event.image}')`;
+        imageDiv.style.backgroundSize = "cover";
+        imageDiv.style.backgroundPosition = "center";
+      }
+    });
+  </script>
+</body>
+
 </html>
