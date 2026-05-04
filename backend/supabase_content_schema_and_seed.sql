@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.events (
     featured BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tags VARCHAR(15)[],
     CHECK (max_participants = 0 OR participants <= max_participants)
 );
 

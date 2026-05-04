@@ -19,6 +19,8 @@ try {
 
     $manager = new EventManager();
 
+    # php://input nal9aw fiha l raw body mte3 request, que ce soit request chniya
+    # houni nestaamlouha bech n traitiw requests li ma yjiwech men Form (form par default yaabi l $_POST w $_FILES)
     $parseJsonBody = function () {
         $body = file_get_contents('php://input');
         if ($body === false || trim($body) === '') {
@@ -72,7 +74,7 @@ try {
                 throw new Exception("Unsupported POST action");
             }
 
-            $payload = $parseJsonBody();
+            $payload = $_POST;
             $response['data'] = $manager->createEvent($payload);
             $response['status'] = 'success';
             $response['message'] = 'Event created successfully';
