@@ -7,11 +7,10 @@ node_modules/
 bower_components/
 jspm_packages/
 web_modules/
-/vendor/
+vendor/
 
-# PHP Composer
+# Composer
 composer.lock
-composer.phar
 
 # Build outputs
 /dist/
@@ -37,6 +36,7 @@ pnpm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+<<<<<<< HEAD
 *.swp
 *.swo
 *~
@@ -57,3 +57,12 @@ Thumbs.db
 /uploads/
 /storage/
 /cache/
+=======
+
+# Generated uploads
+assets/uploads/
+
+# ozymandias
+.env
+.env
+>>>>>>> feature/supabase_integration

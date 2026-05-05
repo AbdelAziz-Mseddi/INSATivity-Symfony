@@ -1,337 +1,256 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>INSATivity | Club Dashboard</title>
-    <link rel="stylesheet" href="../styles/base.css" />
-    <link rel="stylesheet" href="../styles/components.css" />
-    <link rel="stylesheet" href="../styles/layout.css" />
-    <link rel="stylesheet" href="../styles/page.css" />
-    <link rel="stylesheet" href="../styles/club-dashboard.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script type="module" src="../scripts/club-dashboard.js"></script>
-  </head>
-  <body>
-    <header class="main-header">
-      <div class="nav-container">
-        <a href="index.html" class="logo">INSATivity</a>
-        <nav class="main-nav">
-          <a href="index.html" class="nav-link">Events</a>
-          <a href="calendar.html" class="nav-link">Calendar</a>
-          <a href="clubs.html" class="nav-link active">Clubs</a>
-        </nav>
-        <div class="header-actions">
-          <img class="profile-avatar" src="../assets/icons/search.svg" alt="Search" />
-          <img class="profile-avatar" src="../assets/icons/notifications.svg" alt="Notifications" />
-          <img class="profile-avatar" src="../assets/icons/user.svg" alt="User" />
-        </div>
-      </div>
-    </header>
 
-    <div class="dashboard-grid">
-      <div class="sidebar">
-        <div class="sidebar_link" data-role="public" data-target="profile">
-          <img src="../assets/icons/home.svg" />
-          <div>Profile</div>
-        </div>
-        <div class="sidebar_link" data-role="public" data-target="community">
-          <img src="../assets/icons/members.svg" />
-          <div>Community Feedback</div>
-        </div>
-        <div class="sidebar_link" data-role="public" data-target="history">
-          <img src="../assets/icons/history.svg" />
-          <div>History</div>
-        </div>
-        <div class="sidebar_link" data-role="admin" data-target="pending">
-          <img src="../assets/icons/pending.svg" />
-          <div>Pending</div>
-        </div>
-        <div class="sidebar_link" data-role="admin" data-target="done">
-          <img src="../assets/icons/done.svg" />
-          <div>Done</div>
-        </div>
-        <div class="sidebar_link" data-role="admin" data-target="create">
-          <img src="../assets/icons/create_event.svg" />
-          <div>Create Event</div>
-        </div>
-      </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INSATivity | Club Dashboard</title>
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+  <link rel="stylesheet" href="../styles/layout.css" />
+  <link rel="stylesheet" href="../styles/page.css" />
+  <link rel="stylesheet" href="../styles/club-dashboard.css" />
+  <script type="module" src="../scripts/club-dashboard.js"></script>
+</head>
 
-      <div class="panel" data-panel="profile">
-        <section class="club-home">
-          <div class="club-banner" aria-label="Club banner"></div>
-          <div class="club-home-header">
-            <div class="club-logo" aria-hidden="true">CL</div>
-            <div class="club-home-title">
-              <h1 class="club-name">Loading club...</h1>
-              <div class="club-tags" aria-label="Club tags">
-                <span class="club-tag">Loading</span>
-              </div>
-            </div>
-          </div>
-
-          <p class="club-description">Loading club description...</p>
-
-          <div class="club-meta-grid">
-            <div class="club-meta-card">
-              <div class="club-meta-label">Participants</div>
-              <div class="club-meta-value">--</div>
-            </div>
-            <div class="club-meta-card">
-              <div class="club-meta-label">Main Venue</div>
-              <div class="club-meta-value">--</div>
-            </div>
-          </div>
-        </section>
-      </div>
-      <div class="panel" data-panel="pending">
-        <section class="pending">
-          <div class="pending-header">
-            <div>
-              <h2 class="pending-title">Pending Events</h2>
-              <p class="pending-subtitle">
-                Upcoming events for the selected club.
-              </p>
-            </div>
-            <span class="pending-status">-- awaiting review</span>
-          </div>
-
-          <div class="pending-list"></div>
-        </section>
-      </div>
-      <div class="panel" data-panel="create">
-        <section class="event-create">
-          <div class="event-create-header">
-            <h2 class="event-create-title">Create Event</h2>
-            <p class="event-create-subtitle">
-              Share the details below to publish a new event.
-            </p>
-          </div>
-
-          <form class="event-create-form">
-            <div class="form-grid">
-              <div class="form-field">
-                <label class="form-label" for="event-title">Event Title</label>
-                <input
-                  class="form-input"
-                  id="event-title"
-                  name="event-title"
-                  type="text"
-                  placeholder="e.g., Culture Night"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="event-tags">Tags</label>
-                <input
-                  class="form-input"
-                  id="event-tags"
-                  name="event-tags"
-                  type="text"
-                  placeholder="Cultural, Festival, Music"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="event-date">Event Date</label>
-                <input
-                  class="form-input"
-                  id="event-date"
-                  name="event-date"
-                  type="date"
-                  required
-                />
-              </div>
-              <div class="form-field form-field-range">
-                <label class="form-label">Time Span</label>
-                <div class="form-range">
-                  <input
-                    class="form-input"
-                    aria-label="Start time"
-                    name="event-start"
-                    type="time"
-                    required
-                  />
-                  <span class="form-range-divider">to</span>
-                  <input
-                    class="form-input"
-                    aria-label="End time"
-                    name="event-end"
-                    type="time"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="event-places"
-                  >Available Places</label
-                >
-                <input
-                  class="form-input"
-                  id="event-places"
-                  name="event-places"
-                  type="number"
-                  min="1"
-                  placeholder="120"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="event-location">Location</label>
-                <input
-                  class="form-input"
-                  id="event-location"
-                  name="event-location"
-                  type="text"
-                  placeholder="Main Auditorium"
-                  required
-                />
-              </div>
-              <div class="form-field form-field-wide">
-                <label class="form-label" for="event-description"
-                  >Description</label
-                >
-                <textarea
-                  class="form-input form-textarea"
-                  id="event-description"
-                  name="event-description"
-                  rows="5"
-                  placeholder="Describe the event format, speakers, and what attendees should expect."
-                  required
-                ></textarea>
-              </div>
-              <div class="form-field form-field-wide">
-                <label class="form-label" for="event-cover"
-                  >Cover Photo / Poster</label
-                >
-                <div class="form-file">
-                  <input
-                    class="form-input form-file-input"
-                    id="event-cover"
-                    name="event-cover"
-                    type="file"
-                    accept="image/*"
-                    required
-                  />
-                  <span class="form-file-hint"
-                    >Upload JPG or PNG (max 5MB).</span
-                  >
-                </div>
-              </div>
-            </div>
-            <button class="btn btn-gold event-create-submit" type="submit">
-              Suggest Event
-            </button>
-          </form>
-        </section>
-      </div>
-      <div class="panel" data-panel="community">
-        <section class="feedback">
-          <div class="feedback-header">
-            <div>
-              <h2 class="feedback-title">Community Feedback</h2>
-              <p class="feedback-subtitle">
-                Rate a past event from the club’s history. You can add a
-                message. Feedback is anonymous.
-              </p>
-            </div>
-          </div>
-
-          <form class="feedback-form">
-            <div class="feedback-card">
-              <div class="feedback-card-header">
-                <h3 class="feedback-card-title">Select an event to rate</h3>
-                <span class="feedback-note">From history</span>
-              </div>
-              <label class="form-label" for="feedback-event">Event</label>
-              <select
-                class="form-input"
-                id="feedback-event"
-                name="feedback-event"
-                required
-                aria-label="Choose a past event"
-              >
-                <option value="">Choose an event...</option>
-              </select>
-            </div>
-
-            <div class="feedback-card">
-              <div class="feedback-card-header">
-                <h3 class="feedback-card-title">Your rating</h3>
-                <span class="feedback-note">Required</span>
-              </div>
-              <label class="form-label" for="feedback-rating"
-                >How would you rate this event? (0–5)</label
-              >
-              <input
-                class="form-input"
-                id="feedback-rating"
-                name="feedback-rating"
-                type="number"
-                min="0"
-                max="5"
-                step="0.5"
-                placeholder="0–5"
-                required
-                aria-label="Rate from 0 to 5"
-              />
-            </div>
-
-            <div class="feedback-card">
-              <div class="feedback-card-header">
-                <h3 class="feedback-card-title">Message (optional)</h3>
-                <span class="feedback-note">Add details if you like</span>
-              </div>
-              <label class="form-label" for="feedback-message"
-                >Your message</label
-              >
-              <textarea
-                class="form-input form-textarea"
-                id="feedback-message"
-                name="feedback-message"
-                rows="4"
-                placeholder="Share more about your experience—what you liked, what could be better, or suggestions for next time."
-              ></textarea>
-            </div>
-
-            <div class="feedback-footer">
-              <button class="btn btn-gold feedback-submit" type="submit">
-                Submit rating
-              </button>
-            </div>
-          </form>
-        </section>
-      </div>
-      <div class="panel" data-panel="history">
-        <section class="history-section">
-          <div class="history-header">
-            <div>
-              <h2 class="history-title">History</h2>
-              <p class="history-subtitle">
-                Past events that have been reviewed and archived.
-              </p>
-            </div>
-          </div>
-
-          <div class="history-list"></div>
-        </section>
-      </div>
-      <div class="panel" data-panel="done">
-        <section class="done-section">
-          <div class="done-header">
-            <div>
-              <h2 class="done-title">Done</h2>
-              <p class="done-subtitle">
-                Events that have ended. Rate them, add attendance and media,
-                then move to history.
-              </p>
-            </div>
-            <span class="done-status">-- awaiting review</span>
-          </div>
-
-          <div class="done-list"></div>
-        </section>
+<body>
+  <header class="main-header">
+    <div class="nav-container">
+      <div class="logo">INSATivity</div>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link">Events</a>
+        <a href="calendar.html" class="nav-link">Calendar</a>
+        <a href="clubs.html" class="nav-link active">Clubs</a>
+      </nav>
+      <div class="header-actions">
+        <img class="profile-avatar" src="../assets/icons/search.svg" />
+        <img class="profile-avatar" src="../assets/icons/notifications.svg" />
+        <img class="profile-avatar" src="../assets/icons/user.svg" />
+        <a href="../backend/logout.php" class="logout-link" title="Logout" aria-label="Logout">
+          <img class="profile-avatar" src="../assets/icons/logout.png" alt="Logout" />
+        </a>
       </div>
     </div>
-  </body>
+  </header>
+
+  <div class="dashboard-grid">
+    <div class="sidebar">
+      <div class="sidebar_link" data-role="public" data-target="profile">
+        <img src="../assets/icons/home.svg" />
+        <div>Profile</div>
+      </div>
+      <div class="sidebar_link" data-role="public" data-target="community">
+        <img src="../assets/icons/members.svg" />
+        <div>Community Feedback</div>
+      </div>
+      <div class="sidebar_link" data-role="public" data-target="history">
+        <img src="../assets/icons/history.svg" />
+        <div>History</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="pending">
+        <img src="../assets/icons/pending.svg" />
+        <div>Pending</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="done">
+        <img src="../assets/icons/done.svg" />
+        <div>Done</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="create">
+        <img src="../assets/icons/create_event.svg" />
+        <div>Create Event</div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="profile">
+      <section class="club-home">
+        <div class="club-banner" aria-label="Club banner"></div>
+        <div class="club-home-header">
+          <div class="club-logo" aria-hidden="true">CL</div>
+          <div class="club-home-title">
+            <h1 class="club-name">Loading club...</h1>
+            <div class="club-tags" aria-label="Club tags">
+              <span class="club-tag">Loading</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="club-description">Loading club description...</p>
+
+        <div class="club-meta-grid">
+          <div class="club-meta-card">
+            <div class="club-meta-label">Participants</div>
+            <div class="club-meta-value">--</div>
+          </div>
+          <div class="club-meta-card">
+            <div class="club-meta-label">Main Venue</div>
+            <div class="club-meta-value">--</div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="panel" data-panel="pending">
+      <section class="pending">
+        <div class="pending-header">
+          <div>
+            <h2 class="pending-title">Pending Events</h2>
+            <p class="pending-subtitle">
+              Upcoming events for the selected club.
+            </p>
+          </div>
+          <span class="pending-status">-- awaiting review</span>
+        </div>
+
+        <div class="pending-list"></div>
+      </section>
+    </div>
+    <div class="panel" data-panel="create">
+      <section class="event-create">
+        <div class="event-create-header">
+          <h2 class="event-create-title">Create Event</h2>
+          <p class="event-create-subtitle">
+            Share the details below to publish a new event.
+          </p>
+        </div>
+
+        <form class="event-create-form">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label" for="event-title">Event Title</label>
+              <input class="form-input" id="event-title" name="event-title" type="text"
+                placeholder="e.g., Culture Night" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="event-tags">Tags</label>
+              <input class="form-input" id="event-tags" name="event-tags" type="text"
+                placeholder="Cultural, Festival, Music" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="event-date">Event Date</label>
+              <input class="form-input" id="event-date" name="event-date" type="date" required />
+            </div>
+            <div class="form-field form-field-range">
+              <label class="form-label">Time Span</label>
+              <div class="form-range">
+                <input class="form-input" aria-label="Start time" name="event-start" type="time" required />
+                <span class="form-range-divider">to</span>
+                <input class="form-input" aria-label="End time" name="event-end" type="time" required />
+              </div>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="event-places">Available Places</label>
+              <input class="form-input" id="event-places" name="event-places" type="number" min="1" placeholder="120"
+                required />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="event-location">Location</label>
+              <input class="form-input" id="event-location" name="event-location" type="text"
+                placeholder="Main Auditorium" required />
+            </div>
+            <div class="form-field form-field-wide">
+              <label class="form-label" for="event-description">Description</label>
+              <textarea class="form-input form-textarea" id="event-description" name="event-description" rows="5"
+                placeholder="Describe the event format, speakers, and what attendees should expect."
+                required></textarea>
+            </div>
+            <div class="form-field form-field-wide">
+              <label class="form-label" for="event-cover">Cover Photo / Poster</label>
+              <div class="form-file">
+                <input class="form-input form-file-input" id="event-cover" name="event-cover" type="file"
+                  accept="image/*" required />
+                <span class="form-file-hint">Upload JPG or PNG (max 5MB).</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-gold event-create-submit" type="submit">
+            Suggest Event
+          </button>
+        </form>
+      </section>
+    </div>
+    <div class="panel" data-panel="community">
+      <section class="feedback">
+        <div class="feedback-header">
+          <div>
+            <h2 class="feedback-title">Community Feedback</h2>
+            <p class="feedback-subtitle">
+              Rate a past event from the club’s history. You can add a
+              message. Feedback is anonymous.
+            </p>
+          </div>
+        </div>
+
+        <form class="feedback-form">
+          <div class="feedback-card">
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Select an event to rate</h3>
+              <span class="feedback-note">From history</span>
+            </div>
+            <label class="form-label" for="feedback-event">Event</label>
+            <select class="form-input" id="feedback-event" name="feedback-event" required
+              aria-label="Choose a past event">
+              <option value="">Choose an event...</option>
+            </select>
+          </div>
+
+          <div class="feedback-card">
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Your rating</h3>
+              <span class="feedback-note">Required</span>
+            </div>
+            <label class="form-label" for="feedback-rating">How would you rate this event? (0–5)</label>
+            <input class="form-input" id="feedback-rating" name="feedback-rating" type="number" min="0" max="5"
+              step="0.5" placeholder="0–5" required aria-label="Rate from 0 to 5" />
+          </div>
+
+          <div class="feedback-card">
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Message (optional)</h3>
+              <span class="feedback-note">Add details if you like</span>
+            </div>
+            <label class="form-label" for="feedback-message">Your message</label>
+            <textarea class="form-input form-textarea" id="feedback-message" name="feedback-message" rows="4"
+              placeholder="Share more about your experience—what you liked, what could be better, or suggestions for next time."></textarea>
+          </div>
+
+          <div class="feedback-footer">
+            <button class="btn btn-gold feedback-submit" type="submit">
+              Submit rating
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <div class="panel" data-panel="history">
+      <section class="history-section">
+        <div class="history-header">
+          <div>
+            <h2 class="history-title">History</h2>
+            <p class="history-subtitle">
+              Past events that have been reviewed and archived.
+            </p>
+          </div>
+        </div>
+
+        <div class="history-list"></div>
+      </section>
+    </div>
+    <div class="panel" data-panel="done">
+      <section class="done-section">
+        <div class="done-header">
+          <div>
+            <h2 class="done-title">Done</h2>
+            <p class="done-subtitle">
+              Events that have ended. Rate them, add attendance and media,
+              then move to history.
+            </p>
+          </div>
+          <span class="done-status">-- awaiting review</span>
+        </div>
+
+        <div class="done-list"></div>
+      </section>
+    </div>
+  </div>
+</body>
+
 </html>

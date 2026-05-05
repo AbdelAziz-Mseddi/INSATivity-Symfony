@@ -54,7 +54,8 @@ A modern, responsive web platform for university students to discover upcoming a
 
 ### Backend
 - **PHP 8+** - Server-side logic
-- **JSON** - Data storage (flat-file database)
+- **Supabase Postgres (PDO)** - Persistent data storage for users/clubs/events
+- **Local filesystem** - Upload storage at `assets/uploads/`
 
 ### Key Libraries & APIs
 - **Fetch API** - Asynchronous HTTP requests
@@ -100,16 +101,6 @@ Web-Dev-Project/
 │   ├── club-dashboard.css   # Dashboard specific styles
 │   ├── event.css            # Event details page styles
 │   └── page.css             # General page styles
-├── data/                     # JSON data files
-│   ├── clubs.json           # Club information & metadata
-│   ├── acm_events.json      # ACM club events
-│   ├── aerobotix_events.json # Aerobotix club events
-│   ├── cine_radio_events.json # Ciné Radio club events
-│   ├── ieee_events.json     # IEEE club events
-│   ├── jci_events.json      # JCI club events
-│   ├── junior_events.json   # Junior club events
-│   ├── securinets_events.json # Securinets club events
-│   └── theatro_events.json  # Theatro club events
 └── assets/                   # Static assets
     ├── images/              # Event and club images
     │   ├── 3zero/          # 3zero club images
@@ -131,7 +122,8 @@ Web-Dev-Project/
 ## 🚀 Setup & Installation
 
 ### Prerequisites
-- PHP 8.0 or higher
+- PHP 8.1 or higher
+- **Composer** (PHP dependency manager)
 - Web server (Apache, Nginx, or built-in PHP server)
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 
@@ -142,14 +134,26 @@ Web-Dev-Project/
    cd Web-Dev-Project
    ```
 
-2. **Ensure proper file permissions**
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
+   This installs phpdotenv for secure environment variable loading.
+
+3. **Ensure proper file permissions**
    ```bash
    chmod -R 755 backend/
-   chmod -R 755 data/
    chmod -R 755 assets/uploads/
    ```
 
-3. **Start a local server**
+4. **Configure Supabase Postgres connection**
+   - Copy `.env.example` to `.env`
+   - Fill `DATABASE_*` values from Supabase Project Settings > Database
+   - Keep `SUPABASE_DB_SSLMODE=require` (or set explicitly)
+   - Run `backend/supabase_auth_schema.sql` to create `public.users`
+   - Run `backend/supabase_content_schema_and_seed.sql` to create/seed `public.clubs` and `public.events`
+
+5. **Start a local server**
    
    Using PHP built-in server:
    ```bash
@@ -158,7 +162,7 @@ Web-Dev-Project/
    
    Or configure with Apache/Nginx
 
-4. **Access the application**
+6. **Access the application**
    - Open `http://localhost:8000` in your browser
    - Navigate to the homepage
 
@@ -258,6 +262,14 @@ Web-Dev-Project/
 - Student information form
 - Email and password validation
 - Club selection/affiliation
+
+## 🔐 Authentication
+
+User registration and login are backed by Supabase PostgreSQL. See [docs/SUPABASE_AUTH.md](docs/SUPABASE_AUTH.md) for:
+- Architecture and implementation details
+- Database schema and setup
+- API endpoints and validation rules
+- Security practices and troubleshooting
 - Terms acceptance checkbox
 - Form submission and confirmation
 
