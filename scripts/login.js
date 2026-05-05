@@ -40,8 +40,3 @@
     messageBox.style.display = "block";
     messageBox.classList.add("success");
   }
-
-
-const successMessages = {
-  logout: "Vous avez été déconnecté avec succès."
-};
