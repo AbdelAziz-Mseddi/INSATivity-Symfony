@@ -74,7 +74,11 @@ try {
                 throw new Exception("Unsupported POST action");
             }
 
-            $payload = $_POST;
+            $payload = $parseJsonBody();
+            if (empty($payload)) {
+                $payload = $_POST;
+            }
+
             $response['data'] = $manager->createEvent($payload);
             $response['status'] = 'success';
             $response['message'] = 'Event created successfully';

@@ -32,6 +32,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Generated uploads
+assets/uploads/
+
 # ozymandias
 .env
 .env

@@ -90,6 +90,13 @@ class EventManager {
         return array_map([$this, 'mapEvent'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    private function getNextEventId() {
+        $stmt = $this->connection->query('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM public.events');
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return (int)($row['next_id'] ?? 1);
+    }
+
     public function getEventById($id) {
         $events = $this->fetchEvents('e.id = :id', [':id' => (int)$id]);
         return $events[0] ?? null;
@@ -138,8 +145,11 @@ class EventManager {
             throw new Exception('Invalid club name');
         }
 
+        $eventId = $this->getNextEventId();
+
         $stmt = $this->connection->prepare(
             'INSERT INTO public.events (
+                id,
                 club_id,
                 title,
                 image,
@@ -151,6 +161,7 @@ class EventManager {
                 max_participants,
                 featured
              ) VALUES (
+                     :id,
                 :club_id,
                 :title,
                 :image,
@@ -165,6 +176,7 @@ class EventManager {
         );
 
         $stmt->execute([
+            ':id' => $eventId,
             ':club_id' => $clubId,
             ':title' => $payload['title'],
             ':image' => $payload['image'] ?? '',
@@ -174,7 +186,7 @@ class EventManager {
             ':description' => $payload['description'],
             ':participants' => (int)($payload['participants'] ?? 0),
             ':max_participants' => (int)($payload['maxParticipants'] ?? 0),
-            ':featured' => (bool)($payload['featured'] ?? false),
+            ':featured' => !empty($payload['featured']) ? 1 : 0,
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -227,7 +239,7 @@ class EventManager {
             ':description' => $updated['description'],
             ':participants' => (int)($updated['participants'] ?? 0),
             ':max_participants' => (int)($updated['maxParticipants'] ?? 0),
-            ':featured' => (bool)($updated['featured'] ?? false),
+            ':featured' => !empty($updated['featured']) ? 1 : 0,
         ]);
 
         if ($stmt->rowCount() === 0) {
