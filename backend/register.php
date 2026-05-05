@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/Database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../pages/register.html');
@@ -83,7 +83,7 @@ if (!empty($errors)) {
 }
 
 try {
-    $pdo = getPDO();
+    $pdo = Database::connect();
 
     //Vérifier si username ou email existe déjà
 

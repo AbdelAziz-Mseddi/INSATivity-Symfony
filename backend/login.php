@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // Connexion BDD
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/Database.php';
 
 // Fonctions de session
 require_once __DIR__ . '/auth.php';
@@ -30,7 +30,7 @@ if ($username === '' || $password === '') {
 try {
     //Connexion à la base de données.
 
-    $pdo = getPDO();
+    $pdo = Database::connect();
 
     //Recherche de l'utilisateur dans la table users.
 
