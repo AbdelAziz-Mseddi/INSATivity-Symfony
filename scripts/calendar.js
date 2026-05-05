@@ -1,6 +1,4 @@
-'use strict';
-
-const STORAGE_KEY = 'insativity_events';
+import { API } from './api.js';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -15,16 +13,7 @@ const CAT = {
     other: { pill: 'pill-grey', badge: 'badge-grey', label: 'Other' },
 };
 
-const DEFAULT_EVENTS = [
-    { id: 'e1', title: 'Basketball Tournament', date: '2026-02-02', category: 'sports', time: '14:00', location: 'Sports Hall', description: 'Inter-club basketball match. Everyone welcome!' },
-    { id: 'e2', title: 'Career Fair', date: '2026-02-04', category: 'career', time: '09:00', location: 'Main Hall', description: 'Meet 40+ recruiters from top companies.' },
-    { id: 'e3', title: 'Hackathon 2026', date: '2026-02-07', category: 'academic', time: '08:00', location: 'Tech Hub', description: '48-hour coding challenge. Form teams of 3.' },
-    { id: 'e4', title: 'Alumni Gala', date: '2026-02-15', category: 'social', time: '20:00', location: 'Main Quad', description: 'Annual alumni networking gala with dinner.' },
-    { id: 'e5', title: 'Art Exhibition', date: '2026-03-20', category: 'culture', time: '08:00', location: 'Gallery', description: 'Student art showcase — 3 weeks of work.' },
-    { id: 'e6', title: 'Tech Talk: AI Futures', date: '2026-02-25', category: 'academic', time: '10:00', location: 'Amphitheatre', description: 'Panel discussion on AI trends in industry.' },
-];
-
-let events = loadStorage();
+let events = [];
 let current = { year: new Date().getFullYear(), month: new Date().getMonth() };
 let selected = null;
 
@@ -46,24 +35,22 @@ const btnClosePanel = $('btnClosePanel');
 const searchBar = document.querySelector('.search-bar');
 const featuredList = $('featuredList');
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const data = await API.getEvents();
+        if (data) {
+            events = data.filter(e => e.is_approved);
+        }
+    } catch (e) {
+        console.error("Failed to load events for calendar:", e);
+    }
+
     renderCalendar();
     renderFeatured();
     bindControls();
     bindDayPanel();
     bindSearch();
 });
-
-function loadStorage() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [...DEFAULT_EVENTS];
-    } catch {
-        return [...DEFAULT_EVENTS];
-    }
-}
-
-
 
 function renderCalendar() {
     const { year, month } = current;
@@ -122,7 +109,7 @@ function renderCalendar() {
             const MAX = 2;
             dayEvts.slice(0, MAX).forEach(evt => {
                 const pill = document.createElement('span');
-                pill.className = `event-pill ${(CAT[evt.category] || CAT.other).pill}`;
+                pill.className = `event-pill ${(CAT[evt.category || 'other'] || CAT.other).pill}`;
                 pill.textContent = evt.title;
                 cell.appendChild(pill);
             });
@@ -167,7 +154,7 @@ function openDayPanel(year, month, day) {
     } else {
         const frag = document.createDocumentFragment();
         dayEvts.forEach(evt => {
-            const cat = CAT[evt.category] || CAT.other;
+            const cat = CAT[evt.category || 'other'] || CAT.other;
             const item = document.createElement('div');
             item.className = 'agenda-item';
             item.innerHTML = `
@@ -207,7 +194,7 @@ function renderFeatured(filter = '') {
         .filter(e => !lower
             || e.title.toLowerCase().includes(lower)
             || (e.location || '').toLowerCase().includes(lower)
-            || e.category.toLowerCase().includes(lower))
+            || (e.category || 'other').toLowerCase().includes(lower))
         .sort((a, b) => a.date.localeCompare(b.date))
         .slice(0, 8);
 
@@ -218,7 +205,7 @@ function renderFeatured(filter = '') {
 
     const frag = document.createDocumentFragment();
     list.forEach(evt => {
-        const cat = CAT[evt.category] || CAT.other;
+        const cat = CAT[evt.category || 'other'] || CAT.other;
         const dateLabel = new Date(evt.date + 'T00:00')
             .toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         const desc = evt.description
@@ -228,7 +215,7 @@ function renderFeatured(filter = '') {
         const card = document.createElement('article');
         card.className = 'event-card';
         card.innerHTML = `
-            <div class="card-image featured-color-${evt.category}"></div>
+            <div class="card-image featured-color-${evt.category || 'other'}"></div>
             <div class="card-content">
                 <span class="badge ${cat.badge}">${cat.label}</span>
                 <h4>${evt.title}</h4>
@@ -248,10 +235,6 @@ function renderFeatured(filter = '') {
     featuredList.innerHTML = '';
     featuredList.appendChild(frag);
 }
-
-
-
-
 
 function bindControls() {
     btnPrev.addEventListener('click', () => {

@@ -1,8 +1,7 @@
 <?php
+require_once __DIR__ . '/../config/Database.php';
 
-require_once 'Database.php';
-
-class EventManager {
+class EventModel {
     private $connection;
     private $currentDate;
 
@@ -34,6 +33,7 @@ class EventManager {
             'participants' => (int)$row['participants'],
             'maxParticipants' => (int)$row['max_participants'],
             'featured' => (bool)$row['featured'],
+            'is_approved' => isset($row['is_approved']) ? (bool)$row['is_approved'] : true,
             'status' => $this->getEventStatus($date, $time),
         ];
     }
@@ -44,17 +44,10 @@ class EventManager {
         }
 
         $clubName = trim($clubName);
-
         $stmt = $this->connection->prepare(
-            'SELECT id
-             FROM public.clubs
-             WHERE LOWER(name) = LOWER(:club_name)
-             LIMIT 1'
+            'SELECT id FROM public.clubs WHERE LOWER(name) = LOWER(:club_name) LIMIT 1'
         );
-        $stmt->execute([
-            ':club_name' => $clubName
-        ]);
-
+        $stmt->execute([':club_name' => $clubName]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ? $row['id'] : null;
     }
@@ -62,38 +55,25 @@ class EventManager {
     private function fetchEvents($whereClause = '', $params = []) {
         $query = '
             SELECT
-                e.id,
-                e.title,
-                c.name AS club,
-                c.logo AS club_logo,
-                e.image,
-                e.event_date,
-                e.event_time,
-                e.location,
-                e.description,
-                e.participants,
-                e.max_participants,
-                e.featured
+                e.id, e.title, c.name AS club, c.logo AS club_logo, e.image,
+                e.event_date, e.event_time, e.location, e.description,
+                e.participants, e.max_participants, e.featured, e.is_approved
             FROM public.events e
             INNER JOIN public.clubs c ON c.id = e.club_id
         ';
-
         if ($whereClause !== '') {
             $query .= ' WHERE ' . $whereClause;
         }
-
         $query .= ' ORDER BY e.event_date DESC, e.event_time DESC, e.id DESC';
 
         $stmt = $this->connection->prepare($query);
         $stmt->execute($params);
-
         return array_map([$this, 'mapEvent'], $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     private function getNextEventId() {
         $stmt = $this->connection->query('SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM public.events');
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
         return (int)($row['next_id'] ?? 1);
     }
 
@@ -104,35 +84,12 @@ class EventManager {
 
     public function getEventsByClub($club) {
         $clubId = $this->resolveClubId($club);
-        if ($clubId === null) {
-            return [];
-        }
-
+        if ($clubId === null) return [];
         return $this->fetchEvents('e.club_id = :club_id', [':club_id' => $clubId]);
-    }
-
-    public function getEventsByClubAndStatus($club, $status) {
-        $events = $this->getEventsByClub($club);
-
-        return array_values(array_filter($events, function ($event) use ($status) {
-            return $event['status'] === $status;
-        }));
     }
 
     public function getAllEvents() {
         return $this->fetchEvents();
-    }
-
-    public function getEventsByStatus($status) {
-        $events = $this->getAllEvents();
-
-        return array_values(array_filter($events, function ($event) use ($status) {
-            return $event['status'] === $status;
-        }));
-    }
-
-    public function getFeaturedEvents() {
-        return $this->fetchEvents('e.featured = TRUE');
     }
 
     public function createEvent($payload) {
@@ -141,38 +98,12 @@ class EventManager {
         }
 
         $clubId = $this->resolveClubId($payload['club']);
-        if ($clubId === null) {
-            throw new Exception('Invalid club name');
-        }
+        if ($clubId === null) throw new Exception('Invalid club name');
 
         $eventId = $this->getNextEventId();
-
         $stmt = $this->connection->prepare(
-            'INSERT INTO public.events (
-                id,
-                club_id,
-                title,
-                image,
-                event_date,
-                event_time,
-                location,
-                description,
-                participants,
-                max_participants,
-                featured
-             ) VALUES (
-                     :id,
-                :club_id,
-                :title,
-                :image,
-                :event_date,
-                :event_time,
-                :location,
-                :description,
-                :participants,
-                :max_participants,
-                :featured
-             ) RETURNING id'
+            'INSERT INTO public.events (id, club_id, title, image, event_date, event_time, location, description, participants, max_participants, featured)
+             VALUES (:id, :club_id, :title, :image, :event_date, :event_time, :location, :description, :participants, :max_participants, :featured) RETURNING id'
         );
 
         $stmt->execute([
@@ -195,36 +126,20 @@ class EventManager {
 
     public function updateEvent($id, $payload) {
         $eventId = (int)$id;
-        if ($eventId <= 0) {
-            throw new Exception('Invalid event ID');
-        }
+        if ($eventId <= 0) throw new Exception('Invalid event ID');
 
         $existing = $this->getEventById($eventId);
-        if (!$existing) {
-            throw new Exception('Event not found');
-        }
+        if (!$existing) throw new Exception('Event not found');
 
         unset($payload['id'], $payload['status'], $payload['clubLogo']);
         $updated = array_merge($existing, $payload);
 
         $clubId = $this->resolveClubId($updated['club']);
-        if ($clubId === null) {
-            throw new Exception('Invalid club name');
-        }
+        if ($clubId === null) throw new Exception('Invalid club name');
 
         $stmt = $this->connection->prepare(
             'UPDATE public.events
-             SET club_id = :club_id,
-                 title = :title,
-                 image = :image,
-                 event_date = :event_date,
-                 event_time = :event_time,
-                 location = :location,
-                 description = :description,
-                 participants = :participants,
-                 max_participants = :max_participants,
-                 featured = :featured,
-                 updated_at = NOW()
+             SET club_id = :club_id, title = :title, image = :image, event_date = :event_date, event_time = :event_time, location = :location, description = :description, participants = :participants, max_participants = :max_participants, featured = :featured, updated_at = NOW()
              WHERE id = :id'
         );
 
@@ -242,26 +157,28 @@ class EventManager {
             ':featured' => !empty($updated['featured']) ? 1 : 0,
         ]);
 
-        if ($stmt->rowCount() === 0) {
-            throw new Exception('Event not found');
-        }
-
         return $this->getEventById($eventId);
     }
 
     public function deleteEvent($id) {
         $eventId = (int)$id;
-        if ($eventId <= 0) {
-            throw new Exception('Invalid event ID');
-        }
+        if ($eventId <= 0) throw new Exception('Invalid event ID');
 
         $stmt = $this->connection->prepare('DELETE FROM public.events WHERE id = :id');
         $stmt->execute([':id' => $eventId]);
 
-        if ($stmt->rowCount() === 0) {
-            throw new Exception('Event not found');
-        }
-
+        if ($stmt->rowCount() === 0) throw new Exception('Event not found');
         return true;
+    }
+
+    public function approveEvent($id) {
+        $eventId = (int)$id;
+        if ($eventId <= 0) throw new Exception('Invalid event ID');
+
+        $stmt = $this->connection->prepare('UPDATE public.events SET is_approved = TRUE WHERE id = :id');
+        $stmt->execute([':id' => $eventId]);
+
+        if ($stmt->rowCount() === 0) throw new Exception('Event not found');
+        return $this->getEventById($eventId);
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-class MediaManager {
+class MediaModel {
     private $uploadsDir;
     private $allowedTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
     private $maxSize = 5242880; // 5MB
 
     public function __construct() {
-        $this->uploadsDir = __DIR__ . '/../assets/uploads/';
+        $this->uploadsDir = __DIR__ . '/../../assets/uploads/';
         if (!is_dir($this->uploadsDir)) mkdir($this->uploadsDir, 0755, true);
     }
 
@@ -28,7 +28,7 @@ class MediaManager {
         }
 
         $ext = $this->allowedTypes[$mime];
-        $name = ($prefix ? $prefix . '_' : '') . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext; # we could also use uniqid() here instead of 'bin2hex(random_bytes(4))'
+        $name = ($prefix ? $prefix . '_' : '') . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
         $path = $this->uploadsDir . $name;
 
         if (!move_uploaded_file($file['tmp_name'], $path)) {
@@ -39,9 +39,8 @@ class MediaManager {
     }
 
     public function delete($filePath) {
-        # block malicious users who want to delete sensitive files (like system files, configuration...)
         $filePath = str_replace(['..', '\\'], ['', '/'], $filePath);
-        $fullPath = __DIR__ . '/../' . $filePath;
+        $fullPath = __DIR__ . '/../../' . ltrim($filePath, '/');
 
         if (!file_exists($fullPath) || strpos(realpath($fullPath), realpath($this->uploadsDir)) !== 0) {
             throw new Exception('File not found');

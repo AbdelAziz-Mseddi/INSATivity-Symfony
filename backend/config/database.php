@@ -1,83 +1,86 @@
 <?php
-declare(strict_types=1);
 
-function loadEnv(string $path): void
-{
-    // Vérifie si le fichier .env existe
-    if (!file_exists($path)) {
-        throw new RuntimeException(".env file not found");
-    }
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-    // Lit toutes les lignes du fichier .env
-    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+use Dotenv\Dotenv;
 
-    foreach ($lines as $line) {
-        $line = trim($line);
+class Database {
+    private static $dotenv;
+    private static $connection = null;
 
-        // Ignore les lignes vides et les commentaires
-        if ($line === '' || str_starts_with($line, '#')) {
-            continue;
+    public static function connect() {
+        if (self::$connection !== null) {
+            return self::$connection;
         }
 
-        // Sépare la ligne en deux parties : clé et valeur
-        
-        [$key, $value] = array_pad(explode('=', $line, 2), 2, '');
+        self::loadEnvironment();
 
-        $key = trim($key);
-        $value = trim($value);
-
-        // Supprime les guillemets éventuels autour de la valeur
-        $value = trim($value, "\"'");
-
-        // Stocke la variable dans $_ENV et dans l'environnement PHP
-        $_ENV[$key] = $value;
-        putenv("$key=$value");
-    }
-}
-
-//connexion à la base de données
-function getPDO(): PDO
-{
-    // Charge le fichier .env situé à la racine du projet
-    loadEnv(dirname(__DIR__, 2) . '/.env');
-
-    // Si DATABASE_URL existe, on l'utilise directement
-    $databaseUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?: null;
-
-    if ($databaseUrl) {
-       
-        $parts = parse_url($databaseUrl);
-
-        if ($parts === false) {
-            throw new RuntimeException("Invalid DATABASE_URL");
+        if (!class_exists('PDO') || !in_array('pgsql', PDO::getAvailableDrivers(), true)) {
+            throw new Exception('PDO PostgreSQL driver is not enabled in PHP. Install/enable pdo_pgsql.');
         }
 
-        $host = $parts['host'] ?? '';
-        $port = $parts['port'] ?? 5432;
-        $user = isset($parts['user']) ? urldecode($parts['user']) : '';
-        $password = isset($parts['pass']) ? urldecode($parts['pass']) : '';
-        $dbname = isset($parts['path']) ? ltrim($parts['path'], '/') : 'postgres';
+        $host = self::getRequiredEnv('DATABASE_HOST');
+        $port = self::getOptionalEnv('DATABASE_PORT', '5432');
+        $dbname = self::getOptionalEnv('DATABASE_NAME', 'postgres');
+        $user = self::getRequiredEnv('DATABASE_USER');
+        $password = self::getRequiredEnv('DATABASE_PASSWORD');
+        $sslmode = self::getOptionalEnv('SUPABASE_DB_SSLMODE', 'require');
 
-    } else {
-        //Si DATABASE_URL n'existe pas, on utilise les variables séparées.
-       
-        $host = $_ENV['DATABASE_HOST'] ?? getenv('DATABASE_HOST');
-        $port = $_ENV['DATABASE_PORT'] ?? getenv('DATABASE_PORT') ?: 5432;
-        $user = $_ENV['DATABASE_USER'] ?? getenv('DATABASE_USER');
-        $password = $_ENV['DATABASE_PASSWORD'] ?? getenv('DATABASE_PASSWORD');
-        $dbname = $_ENV['DATABASE_NAME'] ?? getenv('DATABASE_NAME') ?: 'postgres';
+        $dsn = sprintf(
+            'pgsql:host=%s;port=%s;dbname=%s;sslmode=%s;application_name=INSATivity',
+            $host,
+            $port,
+            $dbname,
+            $sslmode
+        );
+
+        try {
+            self::$connection = new PDO($dsn, $user, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+        } catch (PDOException $e) {
+            throw new Exception('Failed to connect to Supabase Postgres: ' . $e->getMessage());
+        }
+
+        return self::$connection;
     }
 
-    // DSN PostgreSQL
-    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=prefer";
+    private static function getRequiredEnv($key) {
+        $value = getenv($key);
+        if ($value === false || trim((string)$value) === '') {
+            throw new Exception("Missing required environment variable: {$key}");
+        }
+        return $value;
+    }
 
-    // Création de la connexion PDO
-    return new PDO($dsn, $user, $password, [
-        // Active les exceptions en cas d'erreur SQL
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    private static function getOptionalEnv($key, $default = '') {
+        $value = getenv($key);
+        return $value !== false ? $value : $default;
+    }
 
-        // Désactive l'émulation des requêtes préparées
-        PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
+    public static function loadEnvironment() {
+        if (self::$dotenv !== null) {
+            return;
+        }
+
+        try {
+            $projectRoot = __DIR__ . '/../..';
+            $envFile = $projectRoot . '/.env';
+            
+            if (!file_exists($envFile)) {
+                throw new Exception("Environment file not found at: {$envFile}");
+            }
+
+            self::$dotenv = Dotenv::createImmutable($projectRoot);
+            self::$dotenv->load();
+            
+            foreach ($_ENV as $key => $value) {
+                putenv("{$key}={$value}");
+            }
+        } catch (\Exception $e) {
+            throw new Exception('Failed to load environment variables: ' . $e->getMessage());
+        }
+    }
 }

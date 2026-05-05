@@ -1,26 +1,19 @@
+import { API } from './api.js';
+
 let allClubs = [];
 let selectedCategory = 'All';
 
-// Fetch clubs data from JSON
+// Fetch clubs data from API
 async function loadClubs() {
   try {
-    const response = await fetch("../backend/clubs.php?action=getAll",{ method: 'GET'});
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    
-    if (result.status === 'success' && result.data) {
-      allClubs = result.data;
+    const data = await API.getClubs();
+    if (data) {
+      allClubs = data;
       renderClubs(allClubs);
       setupFilterButtons();
-    } else {
-      console.error("Error from API:", result.errors || result.message);
     }
   } catch (error) {
-    console.error("Error loading events from API:", error);
+    console.error("Error loading clubs from API:", error);
   }
 }
 
