@@ -1,8 +1,17 @@
+.env
+.env.local
+.env.*.local
+
 # Dependencies (frameworks/libraries)
 node_modules/
 bower_components/
 jspm_packages/
 web_modules/
+/vendor/
+
+# PHP Composer
+composer.lock
+composer.phar
 
 # Build outputs
 /dist/
@@ -21,9 +30,30 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+~*
+
+# Local development
+/uploads/
+/storage/
+/cache/
