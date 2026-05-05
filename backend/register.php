@@ -1,91 +1,220 @@
 <?php
+declare(strict_types=1);
 
-require_once 'AuthManager.php';
+require_once __DIR__ . '/config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo '<h3>Method Not Allowed</h3>';
-    echo "<a href='../pages/login.html'>GO BACK, PEASANT!</a>";
+    header('Location: ../pages/register.html');
     exit;
 }
 
+//Récupération des données du formulaire
+
 $fullName = trim($_POST['fullName'] ?? '');
 $username = trim($_POST['username'] ?? '');
-$emailLocalPart = trim($_POST['email'] ?? '');
+$emailInput = trim($_POST['email'] ?? '');
 $major = trim($_POST['major'] ?? '');
 $password = $_POST['password'] ?? '';
 $confirmPassword = $_POST['confirmPassword'] ?? '';
-$acceptTerms = isset($_POST['acceptTerms']) ? $_POST['acceptTerms'] : '';
+$acceptTerms = isset($_POST['acceptTerms']);
 
 $errors = [];
 
+//Normalisation email
+
+$emailInput = strtolower($emailInput);
+
+if ($emailInput !== '' && str_contains($emailInput, '@')) {
+    $email = $emailInput;
+} else {
+    $email = $emailInput . '@insat.ucar.tn';
+}
+
+//Validation des champs
+
 if ($fullName === '') {
-    $errors[] = 'Full Name is required.';
+    $errors[] = 'full_name_required';
 }
 
 if ($username === '') {
-    $errors[] = 'Username is required.';
-} elseif (!preg_match('/^[a-zA-Z0-9_.-]{3,50}$/', $username)) {
-    $errors[] = 'Username must be 3-50 chars and contain only letters, numbers, _, ., -';
+    $errors[] = 'username_required';
+} elseif (strlen($username) < 3) {
+    $errors[] = 'username_too_short';
 }
 
-if ($emailLocalPart === '') {
-    $errors[] = 'University email is required.';
-} elseif (!preg_match('/^[a-zA-Z0-9._%+-]+$/', $emailLocalPart)) {
-    $errors[] = 'Invalid university email format.';
+if ($emailInput === '') {
+    $errors[] = 'email_required';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'email_invalid';
+} elseif (!str_ends_with($email, '@insat.ucar.tn')) {
+    $errors[] = 'email_domain_invalid';
 }
+
+$allowedMajors = ['MPI', 'CBA', 'GL', 'RT', 'IIA', 'IMI', 'BIO', 'CH'];
 
 if ($major === '') {
-    $errors[] = 'Major is required.';
+    $errors[] = 'major_required';
+} elseif (!in_array($major, $allowedMajors, true)) {
+    $errors[] = 'major_invalid';
 }
 
 if ($password === '') {
-    $errors[] = 'Password is required.';
-} elseif (strlen($password) < 8) {
-    $errors[] = 'Password must be at least 8 characters.';
+    $errors[] = 'password_required';
+} elseif (strlen($password) < 6) {
+    $errors[] = 'password_too_short';
 }
 
 if ($confirmPassword === '') {
-    $errors[] = 'Password confirmation is required.';
+    $errors[] = 'confirm_password_required';
 } elseif ($password !== $confirmPassword) {
-    $errors[] = 'Passwords do not match.';
+    $errors[] = 'passwords_not_match';
 }
 
-if ($acceptTerms === '') {
-    $errors[] = 'You must accept the terms & data privacy policy.';
+if (!$acceptTerms) {
+    $errors[] = 'terms_required';
 }
 
-if (count($errors) > 0) {
-    echo '<h3>Errors:</h3>';
-    foreach ($errors as $error) {
-        echo "<p style='color:red;'>{$error}</p>";
-    }
-    echo "<a href='../pages/register.html'>Go Back</a>";
+//Si erreur de validation, retour vers register.html
+
+if (!empty($errors)) {
+    $errorCode = $errors[0];
+    header('Location: ../pages/register.html?error=' . urlencode($errorCode));
     exit;
 }
 
 try {
-    $authManager = new AuthManager();
-    $user = $authManager->registerUser($fullName, $username, $emailLocalPart, $major, $password);
+    $pdo = getPDO();
 
-    session_start();
-    $_SESSION['user'] = [
-        'id' => $user['id'],
-        'full_name' => $user['full_name'],
-        'username' => $user['username'],
-        'email' => $user['email'],
-        'major' => $user['major']
-    ];
+    //Vérifier si username ou email existe déjà
 
-    echo "<h3 style='color:green;'>Registration successful!</h3>";
-    echo '<p>Welcome, ' . $user['full_name'] . '.</p>';
-    echo '<p>Account created for ' . $user['email'] . '.</p>';
-    echo "<a href='../pages/login.html'>Continue to Login</a>";
-} catch (Exception $e) {
-    http_response_code(400);
-    echo '<h3>Registration failed:</h3>';
-    echo '<p style="color:red;">' . $e->getMessage() . '</p>';
-    echo "<a href='../pages/register.html'>Go Back</a>";
+    $stmt = $pdo->prepare(
+        "SELECT id, username, email
+         FROM users
+         WHERE username = :username OR email = :email
+         LIMIT 1"
+    );
+
+    $stmt->execute([
+        'username' => $username,
+        'email' => $email,
+    ]);
+
+    $existingUser = $stmt->fetch();
+
+    if ($existingUser) {
+        if ($existingUser['username'] === $username) {
+            header('Location: ../pages/register.html?error=username_exists');
+            exit;
+        }
+
+        if ($existingUser['email'] === $email) {
+            header('Location: ../pages/register.html?error=email_exists');
+            exit;
+        }
+    }
+
+    //Hasher le mot de passe
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    //Insertion réelle dans la table users
+  
+    $insert = $pdo->prepare(
+        "INSERT INTO users (
+            full_name,
+            username,
+            email,
+            major,
+            password_hash,
+            role
+        )
+        VALUES (
+            :full_name,
+            :username,
+            :email,
+            :major,
+            :password_hash,
+            :role
+        )"
+    );
+
+    $insert->execute([
+        'full_name' => $fullName,
+        'username' => $username,
+        'email' => $email,
+        'major' => $major,
+        'password_hash' => $passwordHash,
+        'role' => 'student',
+    ]);
+
+    //Inscription réussie
+   
+    header('Location: ../pages/login.html?success=registered');
+    exit;
+
+} catch (PDOException $e) {
+    //Erreur BDD
+    error_log($e->getMessage());
+
+    if ($e->getCode() === '23505') {
+        header('Location: ../pages/register.html?error=already_exists');
+        exit;
+    }
+
+    header('Location: ../pages/register.html?error=server');
+    exit;
 }
 
-?>
+        }
+    }
+
+    //Hasher le mot de passe
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    //Insertion réelle dans la table users
+  
+    $insert = $pdo->prepare(
+        "INSERT INTO users (
+            full_name,
+            username,
+            email,
+            major,
+            password_hash,
+            role
+        )
+        VALUES (
+            :full_name,
+            :username,
+            :email,
+            :major,
+            :password_hash,
+            :role
+        )"
+    );
+
+    $insert->execute([
+        'full_name' => $fullName,
+        'username' => $username,
+        'email' => $email,
+        'major' => $major,
+        'password_hash' => $passwordHash,
+        'role' => 'student',
+    ]);
+
+    //Inscription réussie
+   
+    header('Location: ../pages/login.html?success=registered');
+    exit;
+
+} catch (PDOException $e) {
+    //Erreur BDD
+    error_log($e->getMessage());
+
+    if ($e->getCode() === '23505') {
+        header('Location: ../pages/register.html?error=already_exists');
+        exit;
+    }
+
+    header('Location: ../pages/register.html?error=server');
+    exit;
+}
+}

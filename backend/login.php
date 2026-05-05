@@ -1,62 +1,89 @@
 <?php
+declare(strict_types=1);
 
-require_once 'AuthManager.php';
+// Connexion BDD
+require_once __DIR__ . '/config/database.php';
 
-# Blocks anyone who tries to access this script directly in their browser (which would be a GET request).
-# Only accepts POST — the method used when submitting a form.
+// Fonctions de session
+require_once __DIR__ . '/auth.php';
+
+startAppSession();
+
+// Vérifier que la requête vient bien du formulaire login
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo '<h3>Method Not Allowed</h3>';
-    echo "<a href='../pages/login.html'>GO BACK, PEASANT!</a>";
+    header('Location: ../pages/login.html');
     exit;
 }
 
-$identifier = trim($_POST['username'] ?? '');
+
+$username = trim($_POST['username'] ?? '');
 $password = $_POST['password'] ?? '';
 
-$errors = [];
+// Validation  des champs
 
-if ($identifier === '') {
-    $errors[] = 'Username or university email is required.';
-}
-
-if ($password === '') {
-    $errors[] = 'Password is required.';
-}
-
-if (count($errors) > 0) {
-    echo '<h3>Errors:</h3>';
-    foreach ($errors as $error) {
-        echo "<p style='color:red;'>{$error}</p>";
-    }
-    echo "<a href='../pages/login.html'>Go Back</a>";
+if ($username === '' || $password === '') {
+    header('Location: ../pages/login.html?error=empty');
     exit;
-}
-
-if (!str_contains($identifier, '@')) {
-    $identifier = strtolower($identifier);
 }
 
 try {
-    $authManager = new AuthManager();
-    $user = $authManager->loginUser($identifier, $password);
+    //Connexion à la base de données.
 
-    session_start();
-    $_SESSION['user'] = [
-        'id' => $user['id'],
-        'full_name' => $user['full_name'],
-        'username' => $user['username'],
-        'email' => $user['email'],
-        'major' => $user['major']
-    ];
+    $pdo = getPDO();
 
+    //Recherche de l'utilisateur dans la table users.
+
+    $stmt = $pdo->prepare(
+        "SELECT id, full_name, username, email, password_hash, role
+         FROM users
+         WHERE username = :login OR email = :login
+         LIMIT 1"
+    );
+
+    $stmt->execute(['login' => $username ]);
+
+    // Récupère l'utilisateur trouvé
+    $user = $stmt->fetch();
+
+    
+   // Si aucun utilisateur n'est trouvé,on retourne vers login avec un message d'inexistence.
+    
+    if (!$user) {
+        header('Location: ../pages/login.html?error=not_found');
+        exit;
+    }
+
+    //Vérification du mot de passe.
+
+    if (!password_verify($password, $user['password_hash'])) {
+        header('Location: ../pages/login.html?error=wrong_password');
+        exit;
+    }
+
+    /*
+    Sécurité :
+    on régénère l'identifiant de session après un login réussi.
+    Cela limite les attaques de fixation de session.
+    */
+    session_regenerate_id(true);
+
+    //Stockage des informations utiles dans la session.
+   
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['full_name'] = $user['full_name'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['role'] = $user['role'];
+
+    //Login réussi :on redirige vers la page principale.
+    
     header('Location: ../pages/index.html');
     exit;
-} catch (Exception $e) {
-    http_response_code(401);
-    echo '<h3>Login failed:</h3>';
-    echo '<p style="color:red;">' . $e->getMessage() . '</p>';
-    echo "<a href='../pages/login.html'>Go Back</a>";
+} catch (Throwable $e) {
+    
+    error_log($e->getMessage());
+    header('Location: ../pages/login.html?error=server');
+    exit;
 }
 
-?>

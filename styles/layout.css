@@ -120,6 +120,22 @@
     gap: 2rem;
     height: calc(100vh - 200px);
 }
+.logout-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logout-link img {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.logout-link:hover img {
+  transform: scale(1.08);
+  opacity: 0.75;
+}
 
 /* Changes the layout when the screen becomes smaller */
 @media (max-width: 900px) {
