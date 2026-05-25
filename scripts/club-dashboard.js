@@ -20,7 +20,7 @@ import {
   renderLoadError,
   renderPendingEvents,
   setFormStatus,
-} from "./club-dashboard/render.js";
+} from "./club-dashboard/render.js?v=3";
 import {
   getRequestedClubId,
   normalizeText,
@@ -75,10 +75,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // nestaamlou data li jebneha w naltkhouha (rendering) aal dashboard
   function applyClubDashboardContent(club, events) {
-    const { upcomingEvents, finishedEvents } = splitEventsByDate(events);
+    const pendingEvents = events.filter(e => !e.is_approved);
+    const approvedEvents = events.filter(e => e.is_approved);
+    const { upcomingEvents, finishedEvents } = splitEventsByDate(approvedEvents);
 
-    renderClubProfile(dom, club, events);
-    renderPendingEvents(dom, club, upcomingEvents);
+    renderClubProfile(dom, club, approvedEvents);
+    renderPendingEvents(dom, club, pendingEvents);
     renderHistoryEvents(dom, club, finishedEvents);
     renderDoneEvents(dom, club, finishedEvents);
     renderFeedbackEventOptions(dom, finishedEvents);
@@ -168,6 +170,32 @@ document.addEventListener("DOMContentLoaded", () => {
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+
+  // Admin Actions for Pending Events
+  dom.pendingList?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('approve-btn')) {
+      const id = e.target.dataset.id;
+      try {
+        const { API } = await import('./api.js');
+        await API.request(`/events.php?action=approve&id=${id}`, { method: 'PATCH', headers: API.getHeaders() });
+        await loadDashboardData();
+      } catch (err) {
+        alert(err.message || 'Failed to approve event');
+      }
+    }
+    if (e.target.classList.contains('reject-btn')) {
+      const id = e.target.dataset.id;
+      if (confirm('Are you sure you want to reject and delete this event?')) {
+        try {
+          const { API } = await import('./api.js');
+          await API.deleteEvent(id);
+          await loadDashboardData();
+        } catch (err) {
+          alert(err.message || 'Failed to reject event');
+        }
       }
     }
   });

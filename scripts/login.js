@@ -1,42 +1,80 @@
+import { API } from './api.js';
 
-  //Lecture des paramètres dans l'URL.
+document.addEventListener("DOMContentLoaded", () => {
+    const messageBox = document.getElementById("login-message");
+    const loginForm = document.querySelector(".login-form");
 
-  const params = new URLSearchParams(window.location.search);
+    function showMessage(msg, isError = true) {
+        messageBox.textContent = msg;
+        messageBox.style.display = "block";
+        if (isError) {
+            messageBox.classList.add("error");
+            messageBox.classList.remove("success");
+        } else {
+            messageBox.classList.add("success");
+            messageBox.classList.remove("error");
+        }
+    }
 
-  const error = params.get("error");
-  const success = params.get("success");
+    // Lecture des paramètres dans l'URL.
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    const success = params.get("success");
 
-  const messageBox = document.getElementById("login-message");
+    // Messages d'erreur possibles.
+    const errorMessages = {
+        empty: "Veuillez remplir tous les champs.",
+        not_found: "Utilisateur inexistant. Veuillez créer un compte.",
+        wrong_password: "Mot de passe incorrect.",
+        server: "Erreur serveur. Veuillez réessayer plus tard.",
+        login_required: "Vous devez vous connecter pour accéder à cette page."
+    };
 
-  //Messages d'erreur possibles.
- 
-  const errorMessages = {
-    empty: "Veuillez remplir tous les champs.",
-    not_found: "Utilisateur inexistant. Veuillez créer un compte.",
-    wrong_password: "Mot de passe incorrect.",
-    server: "Erreur serveur. Veuillez réessayer plus tard.",
-    login_required: "Vous devez vous connecter pour accéder à cette page."
-  };
+    // Messages de succès possibles.
+    const successMessages = {
+        registered: "Compte créé avec succès. Vous pouvez maintenant vous connecter.",
+        logout: "Vous avez été déconnecté avec succès."
+    };
 
-  //Messages de succès possibles.
+    // Affichage du message d'erreur.
+    if (error && errorMessages[error]) {
+        showMessage(errorMessages[error], true);
+    }
 
-  const successMessages = {
-    registered: "Compte créé avec succès. Vous pouvez maintenant vous connecter.",
-    logout: "Vous avez été déconnecté avec succès."
-  };
+    // Affichage du message de succès.
+    if (success && successMessages[success]) {
+        showMessage(successMessages[success], false);
+    }
 
-  // Affichage du message d'erreur.
-  
-  if (error && errorMessages[error]) {
-    messageBox.textContent = errorMessages[error];
-    messageBox.style.display = "block";
-    messageBox.classList.add("error");
-  }
+    if (loginForm) {
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const username = loginForm.username.value.trim();
+            const password = loginForm.password.value;
 
-  // Affichage du message de succès.
-  
-  if (success && successMessages[success]) {
-    messageBox.textContent = successMessages[success];
-    messageBox.style.display = "block";
-    messageBox.classList.add("success");
-  }
+            if (!username || !password) {
+                showMessage("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            const submitBtn = loginForm.querySelector("button[type='submit']");
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Logging in...";
+
+            try {
+                await API.login(username, password);
+                showMessage("Login successful! Redirecting...", false);
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1000);
+            } catch (err) {
+                showMessage(err.message || "Erreur serveur. Veuillez réessayer plus tard.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    }
+});

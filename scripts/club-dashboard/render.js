@@ -116,9 +116,14 @@ export function renderClubProfile(dom, club, events) {
 // panel l <pending> events (yestanew fel confirmation mel admin)
 // pour le moment l pending wel finished wel history mazel mouch mriguel
 export function renderPendingEvents(dom, club, upcomingEvents) {
-  if (dom.pendingTitle) dom.pendingTitle.textContent = `${club.name} Upcoming Events`;
+  if (dom.pendingTitle) dom.pendingTitle.textContent = `${club.name} Pending Events`;
   if (dom.pendingStatus) dom.pendingStatus.textContent = `${upcomingEvents.length} awaiting review`;
   if (!dom.pendingList) return;
+
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  console.log("Current user for admin check:", user);
+  const isAdmin = user && String(user.role).trim().toLowerCase() === 'admin';
 
   if (!upcomingEvents.length) {
     dom.pendingList.innerHTML = '<article class="pending-card"><div class="pending-body"><h3 class="pending-name">No upcoming events for this club.</h3></div></article>';
@@ -155,6 +160,12 @@ export function renderPendingEvents(dom, club, upcomingEvents) {
             </div>
             <p class="pending-description">${safeDescription}</p>
             <p class="pending-description">${escapeHtml(formatEventDate(event.date, event.time))}</p>
+            ${isAdmin ? `
+            <div class="pending-actions" style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="btn btn-success approve-btn" data-id="${event.id}" style="background-color: #027a48; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Accept</button>
+              <button class="btn btn-danger reject-btn" data-id="${event.id}" style="background-color: #b42318; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;">Refuse</button>
+            </div>
+            ` : ''}
           </div>
         </article>
       `;
