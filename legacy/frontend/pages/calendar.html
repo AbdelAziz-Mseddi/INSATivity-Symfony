@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INSATivity | Calendar</title>
+  <meta name="description" content="Browse, add and manage club events on the INSATivity interactive calendar." />
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/layout.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- ───────────────────────── HEADER ───────────────────────── -->
+  <header class="main-header">
+    <div class="nav-container">
+      <a href="index.html" class="logo">INSATivity</a>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link">Events</a>
+        <a href="calendar.html" class="nav-link active">Calendar</a>
+        <a href="clubs.html" class="nav-link">Clubs</a>
+      </nav>
+      <div class="header-actions">
+        <img class="profile-avatar" src="../assets/icons/search.svg" alt="Search" />
+        <img class="profile-avatar" src="../assets/icons/notifications.svg" alt="Notifications" />
+        <img class="profile-avatar" src="../assets/icons/user.svg" alt="User" />
+        <a href="../backend/logout.php" class="logout-link" title="Logout" aria-label="Logout">
+          <img class="profile-avatar" src="../assets/icons/logout.png" alt="Logout" />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ───────────────────────── MAIN ─────────────────────────── -->
+  <main class="dashboard-container">
+    <div class="dashboard-header">
+      <h1>Event Schedule</h1>
+      <div class="search-filter-wrapper">
+        <input type="text" class="search-bar" placeholder="Search events, clubs, categories…" id="calSearch" />
+      </div>
+    </div>
+
+    <!-- ─── CALENDAR + SIDEBAR GRID ─── -->
+    <div class="dashboard-grid">
+
+      <!-- LEFT: Calendar -->
+      <section class="calendar-section">
+        <div class="calendar-header">
+          <div class="calendar-title-wrapper">
+            <h2 class="calendar-month" id="calMonthLabel">—</h2>
+            <span class="calendar-year" id="calYearLabel">—</span>
+          </div>
+          <div class="calendar-controls">
+            <button class="icon-btn" id="btnPrev" aria-label="Previous month">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button class="icon-btn icon-btn-today" id="btnToday">Today</button>
+            <button class="icon-btn" id="btnNext" aria-label="Next month">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Calendar grid — day names stay static, days are JS-rendered -->
+        <div class="calendar-grid" id="calGrid">
+          <div class="day-name">Sun</div>
+          <div class="day-name">Mon</div>
+          <div class="day-name">Tue</div>
+          <div class="day-name">Wed</div>
+          <div class="day-name">Thu</div>
+          <div class="day-name">Fri</div>
+          <div class="day-name">Sat</div>
+        </div>
+
+      </section>
+      <!-- RIGHT: Featured Events feed -->
+      <aside class="feed-section">
+        <h3>Upcoming Events</h3>
+        <div class="feed-scroll" id="featuredList">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ───────────────────────── DAY DETAILS MODAL ───────────────────────── -->
+  <div class="modal-overlay" id="dayPanelOverlay" role="dialog" aria-modal="true">
+    <div class="modal-card day-panel-card" id="dayPanel">
+      <div class="modal-header">
+        <h3 class="day-panel-title" id="dayPanelTitle">—</h3>
+        <button class="icon-btn icon-btn-close" id="btnClosePanel" aria-label="Close panel">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="day-panel-list" id="dayPanelList"></div>
+    </div>
+  </div>
+
+  <script type="module" src="../scripts/calendar.js?v=2"></script>
+</body>
+
+</html>

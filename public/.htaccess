@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the requested filename exists, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    <IfModule mod_alias.c>
+        # When mod_rewrite is not available, we instruct the user to follow
+        # the equivalent of the rewrite rule above using mod_alias's Redirect
+        RedirectMatch 404 "/"
+    </IfModule>
+</IfModule>

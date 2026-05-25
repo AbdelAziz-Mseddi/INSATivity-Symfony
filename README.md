@@ -1,13 +1,37 @@
-# INSATivity
+# INSATivity - Symfony 6.1 Migration
+
+This branch contains the **Symfony 6.1** migration of the INSATivity web platform.
 
 A modern, responsive web platform for university students to discover upcoming and past events organized by student clubs.
 
+## 📋 Quick Start
+
+```bash
+# Clone and checkout this branch
+git clone <repository-url>
+cd Web-Dev-Project
+git checkout ver/symfony
+
+# Install dependencies
+composer install
+
+# Setup environment
+cp .env.local.example .env.local  # Edit with your credentials
+
+# Start development server
+symfony server:start
+```
+
+Visit `http://localhost:8000`
+
 ## 📋 Table of Contents
+- [Quick Start](#quick-start)
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Setup & Installation](#setup--installation)
+- [Symfony 6.1 Migration](#symfony-61-migration)
 - [Usage](#usage)
 - [Pages & Components](#pages--components)
 - [Data Structure](#data-structure)
@@ -341,25 +365,83 @@ The project uses a **modular CSS architecture**:
 - Responsive design for mobile, tablet, and desktop
 - Accessible color contrasts and semantic HTML
 
+## 🔄 Symfony 6.1 Migration
+
+This project is currently being migrated to **Symfony 6.1** on the `ver/symfony` branch. This migration provides:
+
+### Benefits
+- ✅ Modern PSR-4 autoloading and dependency injection
+- ✅ Structured routing with attributes
+- ✅ Built-in API support and JSON serialization
+- ✅ Security & CSRF protection
+- ✅ Unified logging and debugging
+- ✅ Professional project structure following Symfony best practices
+
+### Migration Approach
+- **Gradual migration**: Legacy code in `backend/` remains functional
+- **Parallel structure**: New Symfony code in `src/`
+- **No downtime**: Features migrate incrementally
+- **Full backward compatibility**: Existing APIs continue to work
+
+### New Directory Structure
+```
+src/
+├── Controller/       # HTTP request handlers
+├── Service/          # Business logic
+├── Entity/           # Database models
+├── Repository/       # Data access layer
+└── Kernel.php        # Application kernel
+
+config/
+├── bundles.php       # Symfony bundle configuration
+├── routes.yaml       # Route definitions
+├── services.yaml     # Service container config
+└── packages/         # Individual bundle configs
+```
+
+### Getting Started with Symfony
+For detailed migration documentation, see [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md).
+
+Common commands:
+```bash
+# Create a new controller
+php bin/console make:controller
+
+# Deploy to production
+composer install --no-dev --optimize-autoloader
+
+# Run tests
+php bin/phpunit
+```
+
 ## 🤝 Contributing
 
 When contributing to this project:
 
 1. **Follow the existing code structure**
-   - Maintain separation of concerns (HTML, CSS, JS, PHP)
+   - New code: Follow Symfony 6.1 conventions in `src/`
+   - Legacy code: Keep in `backend/` with `Legacy\` namespace
    - Use meaningful variable and function names
 
-2. **Data Guidelines**
-   - Keep JSON data files in consistent format
-   - Update club and event data in respective files
+2. **Routing & Controllers**
+   - Use Symfony attributes for route definitions
+   - Place API controllers in `src/Controller/Api/`
+   - Inject dependencies via constructor injection
 
 3. **Styling**
    - Use CSS custom properties for theming
    - Maintain responsive design principles
+   - Keep static files in `public/`
 
 4. **Testing**
-   - Test new features across different browsers
+   - Write tests in `tests/` directory
+   - Use PHPUnit for unit/functional tests
    - Verify responsive design on mobile devices
+
+5. **Database**
+   - Create Doctrine entities in `src/Entity/`
+   - Use repositories for database access
+   - Write migrations for schema changes
 
 ## 📝 License
 

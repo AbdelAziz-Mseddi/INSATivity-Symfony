@@ -1,22 +1,41 @@
-.env
-.env.local
-.env.*.local
+###> symfony/framework-bundle ###
+/.env.local
+/.env.*.local
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
 
-# Dependencies (frameworks/libraries)
-node_modules/
-bower_components/
-jspm_packages/
-web_modules/
-vendor/
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
 
-# Composer
+###> IDE ###
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+###< IDE ###
+
+###> Composer ###
 composer.lock
+###< Composer ###
 
-# Build outputs
-/dist/
-/build/
-/out/
-/.cache/
+###> Node ###
+node_modules/
+npm-debug.log
+yarn-error.log
+###< Node ###
+
+###> Project specific ###
+.env.local.php
+uploads/
+logs/
+temp/
+###< Project specific ###
 
 # Bundler artifacts
 .parcel-cache/
