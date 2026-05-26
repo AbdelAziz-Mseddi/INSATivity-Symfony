@@ -15,7 +15,7 @@ class Club
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::STRING)]
-    private ?string $id = null; // Ex: 'acm', 'ieee'
+    private ?string $id = null;
 
     #[ORM\Column(type: Types::TEXT, unique: true)]
     private ?string $name = null;
