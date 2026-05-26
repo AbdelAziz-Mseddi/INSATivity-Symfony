@@ -21,6 +21,5 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # Legacy namespace for backward compatibility with old backend code
-    Legacy\:
-        resource: '../backend/'
+    # removed the Legacy\: block that pointed to ../backend/ , it breaks the app
+    

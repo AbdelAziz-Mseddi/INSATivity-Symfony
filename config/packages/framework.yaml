@@ -5,7 +5,8 @@ framework:
     http_method_override: false
 
     # see https://symfony.com/doc/current/reference/configuration/framework.html#handle-all-throw-exceptions
-    handle_all_throwables: true
+    # handle_all_throwables: true
+    #removed handle all throwables: it is only supported by symfony 6.4+
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.

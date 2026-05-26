@@ -20,17 +20,23 @@
         "symfony/config": "6.1.*",
         "symfony/validator": "6.1.*",
         "symfony/serializer": "6.1.*",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "symfony/yaml": "6.1.*"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.48",
         "symfony/debug-pack": "*",
-        "symfony/test-pack": "*"
+        "symfony/test-pack": "*",
+        "symfony/web-profiler-bundle": "6.1.*",
+        "symfony/profiler-pack": "*"
     },
     "config": {
         "allow-plugins": {
             "symfony/flex": true,
             "symfony/runtime": true
+        },
+        "audit": {
+            "block-insecure": false
         }
     },
     "autoload": {
