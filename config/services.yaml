@@ -21,6 +21,4 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # Legacy namespace for backward compatibility with old backend code
-    Legacy\:
-        resource: '../backend/'
+
