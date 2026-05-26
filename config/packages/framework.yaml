@@ -1,7 +1,7 @@
 framework:
     secret: '%env(APP_SECRET)%'
-    #csrf_protection:
-    #    enabled: true
+    csrf_protection:
+        enabled: true
     http_method_override: false
 
     # see https://symfony.com/doc/current/reference/configuration/framework.html#handle-all-throw-exceptions
