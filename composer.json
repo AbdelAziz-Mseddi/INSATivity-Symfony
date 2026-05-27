@@ -21,15 +21,20 @@
         "symfony/validator": "6.1.*",
         "symfony/serializer": "6.1.*",
         "vlucas/phpdotenv": "^5.5",
+<<<<<<< HEAD
+=======
         "symfony/form": "6.1.*",
         "symfony/twig-bundle": "6.1.*",
         "symfony/security-csrf": "6.1.*",
+>>>>>>> origin/main
         "symfony/yaml": "6.1.*"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.48",
         "symfony/debug-pack": "*",
-        "symfony/test-pack": "*"
+        "symfony/test-pack": "*",
+        "symfony/web-profiler-bundle": "6.1.*",
+        "symfony/profiler-pack": "*"
     },
     "config": {
         "allow-plugins": {

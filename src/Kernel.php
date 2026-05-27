@@ -4,13 +4,18 @@ namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+<<<<<<< HEAD
+=======
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+>>>>>>> origin/main
 
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
+<<<<<<< HEAD
+=======
     protected function configureContainer(ContainerConfigurator $container): void
     {
         $container->import('../config/{packages}/*.yaml');
@@ -48,4 +53,5 @@ class Kernel extends BaseKernel
             }
         }
     }
+>>>>>>> origin/main
 }

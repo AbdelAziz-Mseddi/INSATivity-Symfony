@@ -1,21 +1,15 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
-
-# API Routes
+# API Controllers
 api_routes:
-    resource:
-        path: '../src/Controller/Api'
-        namespace: App\Controller\Api
+    resource: '../src/Controller/Api'
     type: attribute
     prefix: /api
 
-# Frontend routes (legacy)
-app:
-    resource:
-        path: '../pages'
-    type: glob
-    path: /{file}.html
-    controller: App\Controller\Frontend\PageController::serve
-    requirements:
-        file: '.+'
+# Frontend routes - uncomment when PageController is created
+#app:
+#    resource:
+#        path: '../pages'
+#    type: glob
+#    path: /{file}.html
+#    controller: App\Controller\Frontend\PageController::serve
+#    requirements:
+#        file: '.+'
