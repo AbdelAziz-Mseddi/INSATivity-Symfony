@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}INSATivity | Club Dashboard{% endblock %}
+
+{% block body %}
+  <div class="dashboard-grid">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar_link" data-role="public" data-target="profile">
+        <img src="{{ asset('assets/icons/home.svg') }}" />
+        <div>Profile</div>
+      </div>
+      <div class="sidebar_link" data-role="public" data-target="community">
+        <img src="{{ asset('assets/icons/members.svg') }}" />
+        <div>Community Feedback</div>
+      </div>
+      <div class="sidebar_link" data-role="public" data-target="history">
+        <img src="{{ asset('assets/icons/history.svg') }}" />
+        <div>History</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="pending">
+        <img src="{{ asset('assets/icons/pending.svg') }}" />
+        <div>Pending</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="done">
+        <img src="{{ asset('assets/icons/done.svg') }}" />
+        <div>Done</div>
+      </div>
+      <div class="sidebar_link" data-role="admin" data-target="create">
+        <img src="{{ asset('assets/icons/create_event.svg') }}" />
+        <div>Create Event</div>
+      </div>
+    </div>
+
+    <!-- Profile Panel -->
+    <div class="panel" data-panel="profile">
+      <section class="club-home">
+        <div class="club-banner" style="background-image:url('{{ club.banner }}')"></div>
+        <div class="club-home-header">
+          <div class="club-logo">{{ club.initials }}</div>
+          <div class="club-home-title">
+            <h1 class="club-name">{{ club.name }}</h1>
+            <div class="club-tags">
+              {% for tag in club.tags %}
+                <span class="club-tag">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <p class="club-description">{{ club.description }}</p>
+        <div class="club-meta-grid">
+          <div class="club-meta-card">
+            <div class="club-meta-label">Participants</div>
+            <div class="club-meta-value">{{ club.participants }}</div>
+          </div>
+          <div class="club-meta-card">
+            <div class="club-meta-label">Main Venue</div>
+            <div class="club-meta-value">{{ club.venue }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Pending Panel -->
+    <div class="panel" data-panel="pending">
+      <section class="pending">
+        <div class="pending-header">
+          <div>
+            <h2 class="pending-title">Pending Events</h2>
+            <p class="pending-subtitle">Upcoming events for the selected club.</p>
+          </div>
+          <span class="pending-status">{{ pendingStatus }}</span>
+        </div>
+        <div class="pending-list">
+          {% for event in pendingEvents %}
+            <div class="pending-item">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.date }} – {{ event.location }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <!-- Create Event Panel -->
+    <div class="panel" data-panel="create">
+      <section class="event-create">
+        <div class="event-create-header">
+          <h2>Create Event</h2>
+          <p>Share the details below to publish a new event.</p>
+        </div>
+        <form class="event-create-form" method="POST" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="event-title">Event Title</label>
+              <input id="event-title" name="title" type="text" required />
+            </div>
+            <div class="form-field">
+              <label for="event-tags">Tags</label>
+              <input id="event-tags" name="tags" type="text" required />
+            </div>
+            <div class="form-field">
+              <label for="event-date">Event Date</label>
+              <input id="event-date" name="date" type="date" required />
+            </div>
+            <div class="form-field form-field-range">
+              <label>Time Span</label>
+              <div class="form-range">
+                <input name="start" type="time" required />
+                <span>to</span>
+                <input name="end" type="time" required />
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="event-places">Available Places</label>
+              <input id="event-places" name="places" type="number" min="1" required />
+            </div>
+            <div class="form-field">
+              <label for="event-location">Location</label>
+              <input id="event-location" name="location" type="text" required />
+            </div>
+            <div class="form-field form-field-wide">
+              <label for="event-description">Description</label>
+              <textarea id="event-description" name="description" rows="5" required></textarea>
+            </div>
+            <div class="form-field form-field-wide">
+              <label for="event-cover">Cover Photo / Poster</label>
+              <input id="event-cover" name="cover" type="file" accept="image/*" required />
+            </div>
+          </div>
+          <button class="btn btn-gold" type="submit">Suggest Event</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- Community Feedback Panel -->
+    <div class="panel" data-panel="community">
+      <section class="feedback">
+        <h2>Community Feedback</h2>
+        <p>Rate a past event from the club’s history. Feedback is anonymous.</p>
+        <form class="feedback-form" method="POST">
+          <div class="feedback-card">
+            <h3>Select an event to rate</h3>
+            <select id="feedback-event" name="event" required>
+              <option value="">Choose an event...</option>
+              {% for pastEvent in historyEvents %}
+                <option value="{{ pastEvent.id }}">{{ pastEvent.title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="feedback-card">
+            <h3>Your rating</h3>
+            <input id="feedback-rating" name="rating" type="number" min="0" max="5" step="0.5" required />
+          </div>
+          <div class="feedback-card">
+            <h3>Message (optional)</h3>
+            <textarea id="feedback-message" name="message" rows="4"></textarea>
+          </div>
+          <button class="btn btn-gold" type="submit">Submit rating</button>
+        </form>
+      </section>
+    </div>
+
+    <!-- History Panel -->
+    <div class="panel" data-panel="history">
+      <section class="history-section">
+        <h2>History</h2>
+        <p>Past events that have been reviewed and archived.</p>
+        <div class="history-list">
+          {% for event in historyEvents %}
+            <div class="history-item">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.date }} – {{ event.location }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <!-- Done Panel -->
+    <div class="panel" data-panel="done">
+      <section class="done-section">
+        <h2>Done</h2>
+        <p>Events that have ended. Rate them, add attendance and media, then move to history.</p>
+        <span class="done-status">{{ doneStatus }}</span>
+        <div class="done-list">
+          {% for event in doneEvents %}
+            <div class="done-item">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.date }} – {{ event.location }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

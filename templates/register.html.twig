@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}INSATivity | Register{% endblock %}
+
+{% block body %}
+  <div class="bg-image register-bg"></div>
+  <video autoplay muted loop class="stars-overlay">
+    <source src="{{ asset('assets/twinkling_stars_background.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="glass-container register-card">
+    <form action="{{ path('app_register') }}" method="POST" class="login-form">
+      <h1>Register</h1>
+
+      <div id="register-message" class="login-message">
+        {% if error %}
+          <p class="text-danger">{{ error }}</p>
+        {% endif %}
+      </div>
+
+      <div class="input-box">
+        <input type="text" placeholder="Full Name" name="fullName" required />
+        <i class="fa-solid fa-user-tag"></i>
+      </div>
+
+      <div class="input-box">
+        <input type="text" placeholder="Username" name="username" required />
+        <i class="fa-solid fa-user"></i>
+      </div>
+
+      <div class="input-box email-group">
+        <input type="text" placeholder="University Email" name="email" required />
+        <span class="domain-suffix">@insat.ucar.tn</span>
+        <i class="fa-solid fa-envelope"></i>
+      </div>
+
+      <div class="input-box">
+        <select name="major" required>
+          <option value="" disabled selected>Select Major</option>
+          <option value="MPI">MPI</option>
+          <option value="CBA">CBA</option>
+          <option value="GL">GL</option>
+          <option value="RT">RT</option>
+          <option value="IIA">IIA</option>
+          <option value="IMI">IMI</option>
+          <option value="BIO">BIO</option>
+          <option value="CH">CH</option>
+        </select>
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+
+      <div class="input-box">
+        <input type="password" placeholder="Password" name="password" required />
+        <i class="fa-solid fa-lock"></i>
+      </div>
+
+      <div class="input-box">
+        <input type="password" placeholder="Confirm Password" name="confirmPassword" required />
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <div class="terms-check">
+        <label>
+          <input type="checkbox" name="acceptTerms" required />
+          I accept the terms & data privacy policy
+        </label>
+      </div>
+
+      <button type="submit" class="btn login-submit-btn">
+        Create Account
+      </button>
+
+      <div class="register-link">
+        <p>Already have an account? <a href="{{ path('app_login') }}">Sign In</a></p>
+      </div>
+    </form>
+  </div>
+{% endblock %}

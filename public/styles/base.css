@@ -1,0 +1,64 @@
+:root {
+    /* Color Palette */
+    --primary-blue: #2b3e4e;
+    --accent-gold: #ad9d61;
+    --deep-red: #820608;
+    --olive-green:#3B441B;
+    /* Neutrals */
+    --bg-color: #f4f6f8;
+    --surface-white: #ffffff;
+    --text-main: #2b3e4e;
+    --text-muted: #8898aa;
+    --border-light: #e0e0e0;
+
+    /* Spacing & Layout */
+    --radius-lg: 12px;
+    --radius-sm: 6px;
+    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.05);
+    
+    /* Font */
+    --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-stack);
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for the featured events feed */
+.feed-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.feed-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.feed-scroll::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 10px;
+}
+
+.feed-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-blue);
+}

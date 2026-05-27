@@ -1,0 +1,365 @@
+/*------------------------login page-----------------------------*/
+/* Custom Login Body with video background */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background image */
+.bg-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1;
+}
+
+.bg-image.login-bg {
+    background-image: url('../assets/images/insat_by_night_dragoula.jpeg');
+}
+
+.bg-image.register-bg {
+    background-image: url('../assets/images/insat_vice_city_dragoula.jpeg');
+    background-position: 50% 35%;
+}
+
+/* Stars overlay video */
+.stars-overlay {
+    position: fixed;
+    z-index: 0;
+    opacity: 0.6;
+}
+
+/* The Glass Box */
+.glass-container {
+    position: relative;
+    z-index: 1;
+    width: 420px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    padding: 30px 40px;
+    border-radius: var(--radius-lg); /* Using teammate's variable from base.css */
+    color: var(--surface-white);
+}
+
+.glass-container h1 {
+    font-size: 36px;
+    text-align: center;
+}
+
+/* Input boxes with icons */
+.input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px; /* Fully rounded as requested */
+    padding: 20px 45px 20px 20px;
+    color: white;
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: -15px 0 15px;
+}
+
+/* Specific Login Button */
+.login-submit-btn {
+    width: 100%;
+    height: 45px;
+    background: var(--surface-white);
+    color: var(--primary-blue);
+    border-radius: 40px;
+}
+.register-link a {
+    color: var(--accent-gold); /* Using your teammate's gold variable from base.css */
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Styling the actual labels above the inputs */
+.input-box label {
+    color: var(--olive-green);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+/* Styling the placeholder text inside the boxes if you don't use labels */
+.input-box input::placeholder {
+    color: var(--olive-green);
+    opacity: 1; /* Makes the green vivid */
+}
+
+/* Styling the icons (User/Lock) to match */
+.input-box i {
+    color: var(--olive-green);
+}
+
+/*-------------------------register page----------------------------*/
+
+/* Make the register card slightly larger for all the fields */
+.register-card {
+    width: 500px; /* Slightly wider than login */
+    margin: 20px 0; /* Adds space so it doesn't touch screen edges on small monitors */
+}
+
+/* Style for the Privacy Checkbox row */
+.terms-check {
+    font-size: 13px;
+    margin: -10px 0 20px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.terms-check input {
+    margin-right: 10px;
+    accent-color: var(--accent-gold); /* Checkbox matches team colors */
+}
+
+/* Adjusting spacing for the Register form specifically */
+.register-card .input-box {
+    margin: 20px 0; /* Slightly tighter spacing to fit all fields */
+}
+/* This targets the actual dropdown box */
+.input-box select {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 40px;
+    padding: 0 45px 0 20px;
+    color: white;
+    cursor: pointer;
+    appearance: none; /* Removes default arrow */
+    outline: none;
+}
+
+/* This targets the list that pops up when you click */
+.input-box select option {
+    background-color: var(--primary-blue); /* Sets a dark background so white text shows */
+    color: white;
+}
+
+/* 1. Make the select text look like a muted placeholder by default */
+.input-box select {
+    color: rgba(59, 68, 27, 0.7) !important; /* Your dark olive but 70% transparent */
+    font-weight: 400; /* Normal weight, not bold */
+}
+
+/* 2. Style the icons to match the same muted olive */
+.input-box i {
+    color: rgba(59, 68, 27, 0.7);
+}
+
+/* 3. This is the trick: when the user actually picks something, make it bold/dark */
+.input-box select:valid {
+    color: var(--olive-green) !important;
+    font-weight: 600;
+}
+/* Container for the email input + suffix */
+.email-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* Adjust the input to make room for the suffix on the right */
+.email-group input {
+    padding-right: 140px; /* Adjust this based on the suffix width */
+    color: var(--success-green) !important;
+}
+
+/* Style the domain suffix */
+.domain-suffix {
+    position: absolute;
+    right: 45px; /* Keeps it to the left of the envelope icon */
+    color: var(--success-green);
+    font-weight: 600;
+    font-size: 0.85rem;
+    pointer-events: none; /* User can't click it */
+    opacity: 0.8;
+}
+
+/* Adjust the icon position slightly if needed */
+.email-group i {
+    right: 15px;
+}
+/*-------------------------clubs page----------------------------*/
+
+.hero-section {
+    padding: 4.5rem 0 3.5rem;
+    text-align: center;
+    background: radial-gradient(circle at center, rgba(173, 157, 97, 0.05) 0%, transparent 70%);
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    letter-spacing: -1.5px;
+    margin-bottom: 15px;
+    line-height: 1.1;
+}
+
+.hero-section p {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 650px;
+    margin: 0 auto;
+}
+.card-club {
+    border: none;
+    border-radius: 16px;
+    background: white;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-club:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+.card-img-wrapper {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+}
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.category-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    color:var(--primary-blue);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+.card-body {
+    padding: 1.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+}
+
+.club-title {
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0.5rem 0.5rem 0.8rem 0.5rem;
+    display: block;
+}
+
+.club-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 1.5rem 0.5rem;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+.card-footer-custom {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #f1f5f9;
+
+}
+    
+.btn-join, .btn-view {
+    border-radius: 50px;
+    padding: 6px 18px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.btn-join {
+    background-color: var(--primary-blue);
+    color: white;
+    border: 1px solid var(--primary-blue);
+}
+
+.btn-join:hover {
+    background-color:#132636;
+    border-color: #132636;
+    color: white;
+}
+
+.btn-view {
+    background-color: transparent;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+}
+
+.btn-view:hover {
+    background-color: #f0f4f8;
+    color: var(--primary-blue);
+}   
+/*---------------------------register page----------------------------*/
+.login-message {
+  display: none;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.login-message.error {
+  background: rgba(180, 30, 30, 0.15);
+  color: #7a1010;
+}
+
+.login-message.success {
+  background: rgba(30, 150, 80, 0.15);
+  color: #036b3f;
+}

@@ -1,0 +1,44 @@
+{# templates/base.html.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}INSATivity{% endblock %}</title>
+
+  {# CSS #}
+  <link rel="stylesheet" href="{{ asset('styles/base.css') }}" />
+  <link rel="stylesheet" href="{{ asset('styles/components.css') }}" />
+  <link rel="stylesheet" href="{{ asset('styles/layout.css') }}" />
+  <link rel="stylesheet" href="{{ asset('styles/homepage.css') }}" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="main-header">
+    <div class="nav-container">
+      <div class="logo">INSATivity</div>
+      <nav class="main-nav">
+        <a href="{{ path('events') }}" class="nav-link">Events</a>
+        <a href="{{ path('calendar') }}" class="nav-link">Calendar</a>
+        <a href="{{ path('clubs') }}" class="nav-link">Clubs</a>
+      </nav>
+      <div class="header-actions">
+        <img class="profile-avatar" src="{{ asset('assets/icons/search.svg') }}" />
+        <img class="profile-avatar" src="{{ asset('assets/icons/notifications.svg') }}" />
+        <img class="profile-avatar" src="{{ asset('assets/icons/user.svg') }}" />
+        <a href="{{ path('logout') }}" class="logout-link" title="Logout" aria-label="Logout">
+          <img class="profile-avatar" src="{{ asset('assets/icons/logout.png') }}" alt="Logout" />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    {% block body %}{% endblock %}
+  </main>
+
+  {# JS #}
+  <script type="module" src="{{ asset('scripts/events.js') }}"></script>
+</body>
+</html>

@@ -4,18 +4,6 @@
 
 # API Routes
 api_routes:
-    resource:
-        path: '../src/Controller/Api'
-        namespace: App\Controller\Api
+    resource: '../src/Controller/Api'
     type: attribute
     prefix: /api
-
-# Frontend routes (legacy)
-app:
-    resource:
-        path: '../pages'
-    type: glob
-    path: /{file}.html
-    controller: App\Controller\Frontend\PageController::serve
-    requirements:
-        file: '.+'

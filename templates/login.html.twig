@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}INSATivity | Log In{% endblock %}
+
+{% block body %}
+  <div class="bg-image login-bg"></div>
+  <video autoplay muted loop class="stars-overlay">
+    <source src="{{ asset('assets/twinkling_stars_background.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="glass-container">
+    <form action="{{ path('app_login') }}" method="POST" class="login-form">
+      <h1>Login</h1>
+
+      <div id="login-message" class="login-message">
+        {% if error %}
+          <p class="text-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+        {% endif %}
+      </div>
+
+      <div class="input-box">
+        <input type="text" placeholder="Username" name="_username" required/>
+        <i class="fa-solid fa-user"></i>
+      </div>
+
+      <div class="input-box">
+        <input type="password" placeholder="Password" name="_password" required/>
+        <i class="fa-solid fa-lock"></i>
+      </div>
+
+      <div class="remember-forgot">
+        <label><input type="checkbox" name="_remember_me"/> Remember me</label>
+        <a href="#">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn login-submit-btn">Login</button>
+
+      <div class="register-link">
+        <p>Don't have an account? <a href="{{ path('app_register') }}">Register</a></p>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}INSATivity | Clubs{% endblock %}
+
+{% block body %}
+  <div class="container pb-5">
+    <div class="hero-section">
+      <h1 class="hero-title">Explore communities</h1>
+      <p class="text-muted">
+        Discover and join clubs that match your interests and passions.
+      </p>
+    </div>
+
+    <div class="d-flex justify-content-center gap-2 mb-5 flex-wrap">
+      <button class="btn btn-dark rounded-pill px-4 filter-btn" data-category="All">All</button>
+      <button class="btn btn-white bg-white border rounded-pill px-4 filter-btn" data-category="Technology">
+        Technology
+      </button>
+      <button class="btn btn-white bg-white border rounded-pill px-4 filter-btn" data-category="Entrepreneurship">
+        Entrepreneurship
+      </button>
+      <button class="btn btn-white bg-white border rounded-pill px-4 filter-btn" data-category="Arts">
+        Arts
+      </button>
+      <button class="btn btn-white bg-white border rounded-pill px-4 filter-btn" data-category="Social">
+        Social
+      </button>
+    </div>
+
+    <div class="row g-4" id="clubs-container">
+      {# Exemple d’affichage dynamique #}
+      {% for club in clubs %}
+        <div class="col-md-4">
+          <div class="card h-100">
+            <img src="{{ club.logo }}" class="card-img-top" alt="{{ club.name }}">
+            <div class="card-body">
+              <h5 class="card-title">{{ club.name }}</h5>
+              <p class="card-text">{{ club.description }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

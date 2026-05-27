@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Event | INSATivity{% endblock %}
+
+{% block body %}
+  <div class="image_side" style="background-image: url('{{ event.image }}'); background-size: cover; background-position: center;"></div>
+
+  <div class="content_side">
+    <section class="left">
+      <h1>{{ event.title }}</h1>
+      <span>{{ event.club }}</span>
+      
+      <div class="event-info-grid">
+        <div class="info-item">
+          <strong><i class="fas fa-calendar-alt"></i> Date</strong>
+          <span>{{ event.date }}</span>
+        </div>
+        <div class="info-item">
+          <strong><i class="fas fa-clock"></i> Time</strong>
+          <span>{{ event.time }}</span>
+        </div>
+        <div class="info-item">
+          <strong><i class="fas fa-map-marker-alt"></i> Location</strong>
+          <span>{{ event.location }}</span>
+        </div>
+      </div>
+
+      <div class="description-box">
+        <p>{{ event.description }}</p>
+      </div>
+    </section>
+
+    <aside class="right">
+      <div class="action-card">
+        <div class="participants-line">
+          <div class="progress" style="width: {{ (event.participants / event.maxParticipants) * 100 }}%">
+            {{ event.participants }} / {{ event.maxParticipants }} participants
+          </div>
+        </div>
+        <button class="btn-action btn-primary"><i class="fas fa-user-plus"></i> Register Now</button>
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+          <button class="btn-action btn-outline"><i class="fas fa-calendar-plus"></i> Add to Calendar</button>
+          <button class="btn-action btn-outline"><i class="fas fa-share-alt"></i> Share Event</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+{% endblock %}
