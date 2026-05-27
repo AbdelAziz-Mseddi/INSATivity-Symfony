@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -70,7 +71,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static { $this->password = $password; return $this; }
 
     // --- METHODES DE SECURITE SYMFONY ---
+    /**
+     * Un identifiant visuel qui représente l'utilisateur (utilisé par Symfony).
+     */
     public function getUserIdentifier(): string { return (string) $this->username; }
+    /**
+     * Gère la hiérarchie des rôles.
+     */
     public function getRoles(): array { return array_unique(['ROLE_USER', 'ROLE_' . strtoupper($this->role)]); }
+    /**
+     * Si on stocke des données sensibles temporaires sur l'objet, on les nettoie ici.
+     * En général, on la laisse vide.
+     */
     public function eraseCredentials(): void {}
+
 }
