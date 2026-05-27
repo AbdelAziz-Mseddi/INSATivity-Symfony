@@ -21,5 +21,9 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+<<<<<<< HEAD
     # removed the Legacy\: block that pointed to ../backend/ , it breaks the app
     
+=======
+
+>>>>>>> origin/main

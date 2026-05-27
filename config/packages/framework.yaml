@@ -1,12 +1,15 @@
 framework:
     secret: '%env(APP_SECRET)%'
-    #csrf_protection:
-    #    enabled: true
+    csrf_protection:
+        enabled: true
     http_method_override: false
 
+<<<<<<< HEAD
     # see https://symfony.com/doc/current/reference/configuration/framework.html#handle-all-throw-exceptions
     # handle_all_throwables: true
     #removed handle all throwables: it is only supported by symfony 6.4+
+=======
+>>>>>>> origin/main
 
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.

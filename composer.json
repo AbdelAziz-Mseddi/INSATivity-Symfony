@@ -21,6 +21,12 @@
         "symfony/validator": "6.1.*",
         "symfony/serializer": "6.1.*",
         "vlucas/phpdotenv": "^5.5",
+<<<<<<< HEAD
+=======
+        "symfony/form": "6.1.*",
+        "symfony/twig-bundle": "6.1.*",
+        "symfony/security-csrf": "6.1.*",
+>>>>>>> origin/main
         "symfony/yaml": "6.1.*"
     },
     "require-dev": {
@@ -42,7 +48,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
-            "Legacy\\": "backend/"
+            "Legacy\\": "legacy/backend/"
         }
     },
     "autoload-dev": {
