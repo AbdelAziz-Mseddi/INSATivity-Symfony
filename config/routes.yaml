@@ -1,9 +1,10 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
 
-# API Routes
 api_routes:
-    resource: '../src/Controller/Api'
-    type: attribute
-    prefix: /api
+  resource: '../src/Controller/Api'
+  type: attribute
+
+app:
+  path: /{file}.html
+  controller: App\Controller\Frontend\PageController::serve
+  requirements:
+    file: '.+'
