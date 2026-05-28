@@ -17,7 +17,7 @@ security:
             provider: app_user_provider
 
             json_login:
-              check_path: api_login
+              check_path: /api/auth/login
               username_path: username
               password_path: password
 
@@ -27,15 +27,15 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
             logout:
-              path : api_logout
+              path : api_auth_logout
 
 
 
 
     access_control:
       # Les routes publiques (Login, Register, et la lecture des events)
-      - { path: ^/api/login, roles: PUBLIC_ACCESS }
-      - { path: ^/api/register, roles: PUBLIC_ACCESS }
+      - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
+      - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
       - { path: ^/api/events, roles: PUBLIC_ACCESS, methods: [ GET ] }
       - { path: ^/api/clubs, roles: PUBLIC_ACCESS, methods: [ GET ] }
 

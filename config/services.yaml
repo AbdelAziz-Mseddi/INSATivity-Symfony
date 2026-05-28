@@ -4,7 +4,8 @@
 # https://symfony.com/doc/current/service_container.html#services-load-classes-namespace-as-service
 
 parameters:
-    env(DATABASE_URL): ''
+  env(DATABASE_URL): ''
+
 services:
   # default configuration for services in *this* file
   _defaults:
@@ -20,6 +21,7 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
+  # Configuration du service pour la gestion des médias
   App\Service\MediaService:
     arguments:
       $targetDirectory: '%kernel.project_dir%/public/assets/uploads'

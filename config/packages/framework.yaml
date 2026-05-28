@@ -1,26 +1,27 @@
 framework:
-    secret: '%env(APP_SECRET)%'
-    #csrf_protection:
-    #    enabled: true
-   # http_method_override: false
+  secret: '%env(APP_SECRET)%'
+  csrf_protection:
+    enabled: true
+  http_method_override: false
 
-    # see https://symfony.com/doc/current/reference/configuration/framework.html#handle-all-throw-exceptions
-   # handle_all_throwables: true
+  # see https://symfony.com/doc/current/reference/configuration/framework.html#handle-all-throw-exceptions
+  # handle_all_throwables: true
+  #removed handle all throwables: it is only supported by symfony 6.4+
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
-    session:
-        handler_id: null
-        cookie_secure: auto
-        cookie_samesite: lax
-        storage_factory_id: session.storage.factory.native
+  # Enables session support. Note that the session will ONLY be started if you read or write from it.
+  # Remove or comment this section to explicitly disable session support.
+  session:
+    handler_id: null
+    cookie_secure: auto
+    cookie_samesite: lax
+    storage_factory_id: session.storage.factory.native
 
-    #esi:
-    #    enabled: true
+  #esi:
+  #    enabled: true
 
-    #fragments:
-    #    path: /_fragment
+  #fragments:
+  #    path: /_fragment
 
-    # Uncomment everything in this section to use API Platform
-    # The entry point (if not /): /api (remove the # in front)
-    # prefix: /api
+  # Uncomment everything in this section to use API Platform
+  # The entry point (if not /): /api (remove the # in front)
+  # prefix: /api
