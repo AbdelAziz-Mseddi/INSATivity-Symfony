@@ -7,7 +7,9 @@ class ApiClient {
 
     // Helper for Authorization Header
     getHeaders(isFormData = false) {
-        const headers = {};
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest'  // CSRF protection header
+        };
         const token = localStorage.getItem('jwt_token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;

@@ -28,6 +28,8 @@ class AuthController extends ApiController
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
 
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
         try {
             $payload = $this->getPayload($request);
 
@@ -65,6 +67,8 @@ class AuthController extends ApiController
     public function register(Request $request): JsonResponse
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
+
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
 
         try {
             $payload = $this->getPayload($request);

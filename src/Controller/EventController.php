@@ -71,6 +71,8 @@ class EventController extends ApiController
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
 
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
         try {
             $this->requireRole($request, ['admin', 'student']);
             $payload = $this->getPayload($request);
@@ -113,6 +115,8 @@ class EventController extends ApiController
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
 
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
         try {
             $this->requireRole($request, ['admin', 'student']);
 
@@ -151,6 +155,8 @@ class EventController extends ApiController
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
 
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
         try {
             $this->requireRole($request, ['admin']);
 
@@ -170,6 +176,8 @@ class EventController extends ApiController
     public function delete(int $id, Request $request): JsonResponse
     {
         if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
+
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
 
         try {
             $this->requireRole($request, ['admin']);

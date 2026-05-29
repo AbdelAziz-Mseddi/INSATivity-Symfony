@@ -1,13 +1,34 @@
 security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
     providers:
         users_in_memory: { memory: null }
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
+        # API routes: stateless, no session, no CSRF needed (JWT Bearer auth handles it)
+        api:
+            pattern: ^/api/
+            stateless: true
+            provider: users_in_memory
+
+        # Web routes: session-based
         main:
             lazy: true
             provider: users_in_memory
+
     access_control:
+        # Public API endpoints (login / register / OPTIONS preflight)
+        - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
+        # All other API routes require a valid token (handled manually in controllers)
+        - { path: ^/api/, roles: PUBLIC_ACCESS }
+        # Public web pages
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        # Everything else requires being logged in (JWT checked in base.html.twig)
+        - { path: ^/, roles: PUBLIC_ACCESS }

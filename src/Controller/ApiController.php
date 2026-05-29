@@ -70,4 +70,36 @@ abstract class ApiController extends AbstractController
         }
         return $payload;
     }
+
+    /**
+     * CSRF protection for API endpoints.
+     *
+     * Since this app uses JWT in localStorage (not cookies), the primary CSRF
+     * risk is a malicious site submitting a cross-origin form POST.
+     * Browsers enforce the Same-Origin Policy on custom headers, so requiring
+     * X-Requested-With: XMLHttpRequest blocks all cross-origin form submissions
+     * while our own fetch() calls (which set this header) continue to work.
+     *
+     * This check is skipped for GET/HEAD/OPTIONS (safe/idempotent methods).
+     */
+    protected function verifyCsrf(Request $request): ?JsonResponse
+    {
+        $method = $request->getMethod();
+
+        // Safe methods and CORS preflight don't need CSRF verification
+        if (in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
+            return null;
+        }
+
+        $xrw = $request->headers->get('X-Requested-With');
+        if ($xrw !== 'XMLHttpRequest') {
+            return $this->jsonError(
+                'CSRF check failed. Missing X-Requested-With header.',
+                'CSRF_REJECTED',
+                403
+            );
+        }
+
+        return null;
+    }
 }
