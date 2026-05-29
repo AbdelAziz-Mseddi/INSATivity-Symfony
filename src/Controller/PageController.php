@@ -11,8 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PageController extends AbstractController
 {
-    #[Route('/', name: 'home_slash')]
-    #[Route('/index.html', name: 'home')]
+    #[Route('/', name: 'home')]
     public function index(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAllEventsOrdered();
@@ -21,7 +20,7 @@ class PageController extends AbstractController
         ]);
     }
 
-    #[Route('/clubs.html', name: 'clubs')]
+    #[Route('/clubs', name: 'clubs')]
     public function clubs(ClubRepository $clubRepository): Response
     {
         $clubs = $clubRepository->findAll();
@@ -30,7 +29,7 @@ class PageController extends AbstractController
         ]);
     }
 
-    #[Route('/calendar.html', name: 'calendar')]
+    #[Route('/calendar', name: 'calendar')]
     public function calendar(EventRepository $eventRepository): Response
     {
         $events = $eventRepository->findAllEventsOrdered();
@@ -39,7 +38,7 @@ class PageController extends AbstractController
         ]);
     }
 
-    #[Route('/event.html', name: 'event_detail')]
+    #[Route('/event', name: 'event_detail')]
     public function eventDetail(Request $request, EventRepository $eventRepository): Response
     {
         $id = $request->query->get('id');
@@ -50,7 +49,7 @@ class PageController extends AbstractController
         ]);
     }
 
-    #[Route('/club-dashboard.html', name: 'club_dashboard')]
+    #[Route('/club-dashboard', name: 'club_dashboard')]
     public function clubDashboard(Request $request, ClubRepository $clubRepository, EventRepository $eventRepository): Response
     {
         $clubId = $request->query->get('club');
@@ -63,13 +62,13 @@ class PageController extends AbstractController
         ]);
     }
 
-    #[Route('/login.html', name: 'login')]
+    #[Route('/login', name: 'login')]
     public function login(): Response
     {
         return $this->render('login.html.twig');
     }
 
-    #[Route('/register.html', name: 'register')]
+    #[Route('/register', name: 'register')]
     public function register(): Response
     {
         return $this->render('register.html.twig');

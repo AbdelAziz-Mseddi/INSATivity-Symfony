@@ -46,8 +46,7 @@ function renderClubs(clubs) {
           <p class="club-desc">${club.description}</p>
           <div class="card-footer-custom">
             <div class="d-flex gap-2">
-              <a href="club-dashboard.html?club=${encodeURIComponent(club.id)}" class="btn-view">View Club</a>
-              <button class="btn-join">Join</button>
+              <a href="club-dashboard?club=${encodeURIComponent(club.id)}" class="btn-view">View Club</a>
             </div>
           </div>
         </div>
