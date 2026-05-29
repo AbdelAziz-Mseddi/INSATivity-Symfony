@@ -2,196 +2,232 @@
 
 {% block title %}INSATivity | Club Dashboard{% endblock %}
 
+{% block stylesheets %}
+  <link rel="stylesheet" href="/styles/page.css" />
+  <link rel="stylesheet" href="/styles/club-dashboard.css" />
+{% endblock %}
+
 {% block body %}
   <div class="dashboard-grid">
-    <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar_link" data-role="public" data-target="profile">
-        <img src="{{ asset('assets/icons/home.svg') }}" />
+        <img src="/assets/icons/home.svg" alt="Home" />
         <div>Profile</div>
       </div>
       <div class="sidebar_link" data-role="public" data-target="community">
-        <img src="{{ asset('assets/icons/members.svg') }}" />
+        <img src="/assets/icons/members.svg" alt="Community" />
         <div>Community Feedback</div>
       </div>
       <div class="sidebar_link" data-role="public" data-target="history">
-        <img src="{{ asset('assets/icons/history.svg') }}" />
+        <img src="/assets/icons/history.svg" alt="History" />
         <div>History</div>
       </div>
       <div class="sidebar_link" data-role="admin" data-target="pending">
-        <img src="{{ asset('assets/icons/pending.svg') }}" />
+        <img src="/assets/icons/pending.svg" alt="Pending" />
         <div>Pending</div>
       </div>
       <div class="sidebar_link" data-role="admin" data-target="done">
-        <img src="{{ asset('assets/icons/done.svg') }}" />
+        <img src="/assets/icons/done.svg" alt="Done" />
         <div>Done</div>
       </div>
       <div class="sidebar_link" data-role="admin" data-target="create">
-        <img src="{{ asset('assets/icons/create_event.svg') }}" />
+        <img src="/assets/icons/create_event.svg" alt="Create Event" />
         <div>Create Event</div>
       </div>
     </div>
 
-    <!-- Profile Panel -->
     <div class="panel" data-panel="profile">
       <section class="club-home">
-        <div class="club-banner" style="background-image:url('{{ club.banner }}')"></div>
+        <div class="club-banner" aria-label="Club banner"></div>
         <div class="club-home-header">
-          <div class="club-logo">{{ club.initials }}</div>
+          <div class="club-logo" aria-hidden="true">CL</div>
           <div class="club-home-title">
-            <h1 class="club-name">{{ club.name }}</h1>
-            <div class="club-tags">
-              {% for tag in club.tags %}
-                <span class="club-tag">{{ tag }}</span>
-              {% endfor %}
+            <h1 class="club-name">Loading club...</h1>
+            <div class="club-tags" aria-label="Club tags">
+              <span class="club-tag">Loading</span>
             </div>
           </div>
         </div>
-        <p class="club-description">{{ club.description }}</p>
+
+        <p class="club-description">Loading club description...</p>
+
         <div class="club-meta-grid">
           <div class="club-meta-card">
             <div class="club-meta-label">Participants</div>
-            <div class="club-meta-value">{{ club.participants }}</div>
+            <div class="club-meta-value">--</div>
           </div>
           <div class="club-meta-card">
             <div class="club-meta-label">Main Venue</div>
-            <div class="club-meta-value">{{ club.venue }}</div>
+            <div class="club-meta-value">--</div>
           </div>
         </div>
       </section>
     </div>
-
-    <!-- Pending Panel -->
     <div class="panel" data-panel="pending">
       <section class="pending">
         <div class="pending-header">
           <div>
             <h2 class="pending-title">Pending Events</h2>
-            <p class="pending-subtitle">Upcoming events for the selected club.</p>
+            <p class="pending-subtitle">
+              Upcoming events for the selected club.
+            </p>
           </div>
-          <span class="pending-status">{{ pendingStatus }}</span>
+          <span class="pending-status">-- awaiting review</span>
         </div>
-        <div class="pending-list">
-          {% for event in pendingEvents %}
-            <div class="pending-item">
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.date }} – {{ event.location }}</p>
-            </div>
-          {% endfor %}
-        </div>
+
+        <div class="pending-list"></div>
       </section>
     </div>
-
-    <!-- Create Event Panel -->
     <div class="panel" data-panel="create">
       <section class="event-create">
         <div class="event-create-header">
-          <h2>Create Event</h2>
-          <p>Share the details below to publish a new event.</p>
+          <h2 class="event-create-title">Create Event</h2>
+          <p class="event-create-subtitle">
+            Share the details below to publish a new event.
+          </p>
         </div>
-        <form class="event-create-form" method="POST" enctype="multipart/form-data">
+
+        <form class="event-create-form">
           <div class="form-grid">
             <div class="form-field">
-              <label for="event-title">Event Title</label>
-              <input id="event-title" name="title" type="text" required />
+              <label class="form-label" for="event-title">Event Title</label>
+              <input class="form-input" id="event-title" name="event-title" type="text"
+                placeholder="e.g., Culture Night" required />
             </div>
             <div class="form-field">
-              <label for="event-tags">Tags</label>
-              <input id="event-tags" name="tags" type="text" required />
+              <label class="form-label" for="event-tags">Tags</label>
+              <input class="form-input" id="event-tags" name="event-tags" type="text"
+                placeholder="Cultural, Festival, Music" required />
             </div>
             <div class="form-field">
-              <label for="event-date">Event Date</label>
-              <input id="event-date" name="date" type="date" required />
+              <label class="form-label" for="event-date">Event Date</label>
+              <input class="form-input" id="event-date" name="event-date" type="date" required />
             </div>
             <div class="form-field form-field-range">
-              <label>Time Span</label>
+              <label class="form-label">Time Span</label>
               <div class="form-range">
-                <input name="start" type="time" required />
-                <span>to</span>
-                <input name="end" type="time" required />
+                <input class="form-input" aria-label="Start time" name="event-start" type="time" required />
+                <span class="form-range-divider">to</span>
+                <input class="form-input" aria-label="End time" name="event-end" type="time" required />
               </div>
             </div>
             <div class="form-field">
-              <label for="event-places">Available Places</label>
-              <input id="event-places" name="places" type="number" min="1" required />
+              <label class="form-label" for="event-places">Available Places</label>
+              <input class="form-input" id="event-places" name="event-places" type="number" min="1" placeholder="120"
+                required />
             </div>
             <div class="form-field">
-              <label for="event-location">Location</label>
-              <input id="event-location" name="location" type="text" required />
+              <label class="form-label" for="event-location">Location</label>
+              <input class="form-input" id="event-location" name="event-location" type="text"
+                placeholder="Main Auditorium" required />
             </div>
             <div class="form-field form-field-wide">
-              <label for="event-description">Description</label>
-              <textarea id="event-description" name="description" rows="5" required></textarea>
+              <label class="form-label" for="event-description">Description</label>
+              <textarea class="form-input form-textarea" id="event-description" name="event-description" rows="5"
+                placeholder="Describe the event format, speakers, and what attendees should expect."
+                required></textarea>
             </div>
             <div class="form-field form-field-wide">
-              <label for="event-cover">Cover Photo / Poster</label>
-              <input id="event-cover" name="cover" type="file" accept="image/*" required />
+              <label class="form-label" for="event-cover">Cover Photo / Poster</label>
+              <div class="form-file">
+                <input class="form-input form-file-input" id="event-cover" name="event-cover" type="file"
+                  accept="image/*" required />
+                <span class="form-file-hint">Upload JPG or PNG (max 5MB).</span>
+              </div>
             </div>
           </div>
-          <button class="btn btn-gold" type="submit">Suggest Event</button>
+          <button class="btn btn-gold event-create-submit" type="submit">
+            Suggest Event
+          </button>
         </form>
       </section>
     </div>
-
-    <!-- Community Feedback Panel -->
     <div class="panel" data-panel="community">
       <section class="feedback">
-        <h2>Community Feedback</h2>
-        <p>Rate a past event from the club’s history. Feedback is anonymous.</p>
-        <form class="feedback-form" method="POST">
+        <div class="feedback-header">
+          <div>
+            <h2 class="feedback-title">Community Feedback</h2>
+            <p class="feedback-subtitle">
+              Rate a past event from the club’s history. You can add a
+              message. Feedback is anonymous.
+            </p>
+          </div>
+        </div>
+
+        <form class="feedback-form">
           <div class="feedback-card">
-            <h3>Select an event to rate</h3>
-            <select id="feedback-event" name="event" required>
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Select an event to rate</h3>
+              <span class="feedback-note">From history</span>
+            </div>
+            <label class="form-label" for="feedback-event">Event</label>
+            <select class="form-input" id="feedback-event" name="feedback-event" required
+              aria-label="Choose a past event">
               <option value="">Choose an event...</option>
-              {% for pastEvent in historyEvents %}
-                <option value="{{ pastEvent.id }}">{{ pastEvent.title }}</option>
-              {% endfor %}
             </select>
           </div>
+
           <div class="feedback-card">
-            <h3>Your rating</h3>
-            <input id="feedback-rating" name="rating" type="number" min="0" max="5" step="0.5" required />
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Your rating</h3>
+              <span class="feedback-note">Required</span>
+            </div>
+            <label class="form-label" for="feedback-rating">How would you rate this event? (0–5)</label>
+            <input class="form-input" id="feedback-rating" name="feedback-rating" type="number" min="0" max="5"
+              step="0.5" placeholder="0–5" required aria-label="Rate from 0 to 5" />
           </div>
+
           <div class="feedback-card">
-            <h3>Message (optional)</h3>
-            <textarea id="feedback-message" name="message" rows="4"></textarea>
+            <div class="feedback-card-header">
+              <h3 class="feedback-card-title">Message (optional)</h3>
+              <span class="feedback-note">Add details if you like</span>
+            </div>
+            <label class="form-label" for="feedback-message">Your message</label>
+            <textarea class="form-input form-textarea" id="feedback-message" name="feedback-message" rows="4"
+              placeholder="Share more about your experience—what you liked, what could be better, or suggestions for next time."></textarea>
           </div>
-          <button class="btn btn-gold" type="submit">Submit rating</button>
+
+          <div class="feedback-footer">
+            <button class="btn btn-gold feedback-submit" type="submit">
+              Submit rating
+            </button>
+          </div>
         </form>
       </section>
     </div>
-
-    <!-- History Panel -->
     <div class="panel" data-panel="history">
       <section class="history-section">
-        <h2>History</h2>
-        <p>Past events that have been reviewed and archived.</p>
-        <div class="history-list">
-          {% for event in historyEvents %}
-            <div class="history-item">
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.date }} – {{ event.location }}</p>
-            </div>
-          {% endfor %}
+        <div class="history-header">
+          <div>
+            <h2 class="history-title">History</h2>
+            <p class="history-subtitle">
+              Past events that have been reviewed and archived.
+            </p>
+          </div>
         </div>
+
+        <div class="history-list"></div>
       </section>
     </div>
-
-    <!-- Done Panel -->
     <div class="panel" data-panel="done">
       <section class="done-section">
-        <h2>Done</h2>
-        <p>Events that have ended. Rate them, add attendance and media, then move to history.</p>
-        <span class="done-status">{{ doneStatus }}</span>
-        <div class="done-list">
-          {% for event in doneEvents %}
-            <div class="done-item">
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.date }} – {{ event.location }}</p>
-            </div>
-          {% endfor %}
+        <div class="done-header">
+          <div>
+            <h2 class="done-title">Done</h2>
+            <p class="done-subtitle">
+              Events that have ended. Rate them, add attendance and media,
+              then move to history.
+            </p>
+          </div>
+          <span class="done-status">-- awaiting review</span>
         </div>
+
+        <div class="done-list"></div>
       </section>
     </div>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script type="module" src="/scripts/club-dashboard.js?v=4"></script>
 {% endblock %}

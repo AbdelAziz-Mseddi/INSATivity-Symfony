@@ -10,52 +10,38 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-/**
- * Login form — not bound to any entity.
- *
- * Symfony Security's authenticator handles the actual login logic;
- * this form only provides structure, labels, and basic validation
- * for the Twig template to render.
- */
 class LoginType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('username', TextType::class, [
-                'label' => 'Username',
-                'attr' => [
-                    'placeholder' => 'Username',
-                    'autocomplete' => 'username',
-                ],
+                'label'       => 'Username',
+                'attr'        => ['placeholder' => 'Username'],
                 'constraints' => [
                     new NotBlank(['message' => 'Please enter your username.']),
                 ],
             ])
             ->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'placeholder' => 'Password',
-                    'autocomplete' => 'current-password',
-                ],
+                'label'       => 'Password',
+                'attr'        => ['placeholder' => 'Password'],
                 'constraints' => [
                     new NotBlank(['message' => 'Please enter your password.']),
                 ],
             ])
             ->add('remember', CheckboxType::class, [
-                'label' => 'Remember me',
+                'label'    => 'Remember me',
                 'required' => false,
-            ]);
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            // No entity mapping — Security authenticator processes login
-            'data_class' => null,
             'csrf_protection' => true,
             'csrf_field_name' => '_token',
-            'csrf_token_id' => 'authenticate',
+            'csrf_token_id'   => 'login',
         ]);
     }
 }

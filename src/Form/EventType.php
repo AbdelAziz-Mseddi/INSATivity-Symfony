@@ -2,12 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Club;
-use App\Entity\Event;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -17,181 +12,94 @@ use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
-use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
+use Symfony\Component\Validator\Constraints\Positive;
 
-/**
- * Event creation and editing form.
- *
- * Maps to App\Entity\Event (to be created by the Doctrine teammate).
- * The entity should have properties: title, club (ManyToOne → Club),
- * image, eventDate, eventTime, location, description, participants,
- * maxParticipants, featured, tags.
- *
- * Usage in controller:
- *   $form = $this->createForm(EventType::class, $event);
- *   $form = $this->createForm(EventType::class, $event, ['is_edit' => true]);
- */
 class EventType extends AbstractType
 {
-    /**
-     * Predefined tags for event categorization.
-     * Tags stored as a VARCHAR(15)[] array in the database.
-     */
-    private const AVAILABLE_TAGS = [
-        'Workshop'      => 'workshop',
-        'Competition'   => 'competition',
-        'Conference'    => 'conference',
-        'Hackathon'     => 'hackathon',
-        'Training'      => 'training',
-        'Social'        => 'social',
-        'Sports'        => 'sports',
-        'Cultural'      => 'cultural',
-        'Music'         => 'music',
-        'Networking'    => 'networking',
-        'Career'        => 'career',
-        'Charity'       => 'charity',
-    ];
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $isEdit = $options['is_edit'];
-
         $builder
             ->add('title', TextType::class, [
-                'label' => 'Event Title',
-                'attr' => [
-                    'placeholder' => 'Enter event title',
-                ],
+                'label'       => 'Event Title',
+                'attr'        => ['placeholder' => 'e.g., Culture Night'],
                 'constraints' => [
-                    new NotBlank(['message' => 'Please enter the event title.']),
-                    new Length([
-                        'max' => 150,
-                        'maxMessage' => 'Title cannot exceed {{ limit }} characters.',
-                    ]),
+                    new NotBlank(['message' => 'Please enter an event title.']),
                 ],
             ])
-            ->add('club', EntityType::class, [
-                'class' => Club::class,
-                'choice_label' => 'name',
-                'label' => 'Organizing Club',
-                'placeholder' => 'Select a club',
+            ->add('tags', TextType::class, [
+                'label'    => 'Tags',
+                'attr'     => ['placeholder' => 'Cultural, Festival, Music'],
+                'required' => false,
+            ])
+            ->add('date', DateType::class, [
+                'label'       => 'Event Date',
+                'widget'      => 'single_text',
                 'constraints' => [
-                    new NotNull(['message' => 'Please select the organizing club.']),
+                    new NotBlank(['message' => 'Please select an event date.']),
                 ],
             ])
-            ->add('image', FileType::class, [
-                'label' => 'Event Image',
-                'mapped' => false, // Handled manually in the controller (file upload)
-                'required' => !$isEdit, // Required only on creation
+            ->add('startTime', TimeType::class, [
+                'label'       => 'Start Time',
+                'widget'      => 'single_text',
                 'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                        ],
-                        'mimeTypesMessage' => 'Please upload a valid image (JPEG, PNG, or WebP).',
-                        'maxSizeMessage' => 'Image is too large ({{ size }} {{ suffix }}). Maximum allowed: {{ limit }} {{ suffix }}.',
-                    ]),
+                    new NotBlank(['message' => 'Please set the start time.']),
                 ],
             ])
-            ->add('eventDate', DateType::class, [
-                'label' => 'Event Date',
-                'widget' => 'single_text', // Renders as <input type="date">
+            ->add('endTime', TimeType::class, [
+                'label'       => 'End Time',
+                'widget'      => 'single_text',
                 'constraints' => [
-                    new NotBlank(['message' => 'Please select the event date.']),
+                    new NotBlank(['message' => 'Please set the end time.']),
                 ],
             ])
-            ->add('eventTime', TimeType::class, [
-                'label' => 'Event Time',
-                'widget' => 'single_text', // Renders as <input type="time">
+            ->add('places', IntegerType::class, [
+                'label'       => 'Available Places',
+                'attr'        => ['placeholder' => '120', 'min' => 1],
                 'constraints' => [
-                    new NotBlank(['message' => 'Please select the event time.']),
+                    new NotBlank(['message' => 'Please specify the number of available places.']),
+                    new Positive(['message' => 'Number of places must be positive.']),
                 ],
             ])
             ->add('location', TextType::class, [
-                'label' => 'Location',
-                'attr' => [
-                    'placeholder' => 'e.g. Auditorium, Reading Room, Online...',
-                ],
+                'label'       => 'Location',
+                'attr'        => ['placeholder' => 'Main Auditorium'],
                 'constraints' => [
-                    new NotBlank(['message' => 'Please enter the event location.']),
-                    new Length([
-                        'max' => 200,
-                        'maxMessage' => 'Location cannot exceed {{ limit }} characters.',
-                    ]),
+                    new NotBlank(['message' => 'Please enter a location.']),
                 ],
             ])
             ->add('description', TextareaType::class, [
-                'label' => 'Description',
-                'attr' => [
-                    'placeholder' => 'Describe the event...',
-                    'rows' => 6,
+                'label'       => 'Description',
+                'attr'        => [
+                    'rows'        => 5,
+                    'placeholder' => 'Describe the event format, speakers, and what attendees should expect.',
                 ],
                 'constraints' => [
-                    new NotBlank(['message' => 'Please enter an event description.']),
-                    new Length([
-                        'max' => 5000,
-                        'maxMessage' => 'Description cannot exceed {{ limit }} characters.',
-                    ]),
+                    new NotBlank(['message' => 'Please enter a description.']),
                 ],
             ])
-            ->add('participants', IntegerType::class, [
-                'label' => 'Current Participants',
-                'attr' => [
-                    'min' => 0,
-                    'placeholder' => '0',
-                ],
-                'constraints' => [
-                    new NotNull(['message' => 'Please enter the number of participants.']),
-                    new GreaterThanOrEqual([
-                        'value' => 0,
-                        'message' => 'Participants cannot be negative.',
-                    ]),
-                ],
-            ])
-            ->add('maxParticipants', IntegerType::class, [
-                'label' => 'Max Participants',
-                'attr' => [
-                    'min' => 0,
-                    'placeholder' => '0 = unlimited',
-                ],
-                'help' => 'Set to 0 for unlimited capacity.',
-                'constraints' => [
-                    new NotNull(['message' => 'Please enter the max participants.']),
-                    new GreaterThanOrEqual([
-                        'value' => 0,
-                        'message' => 'Max participants cannot be negative.',
-                    ]),
-                ],
-            ])
-            ->add('featured', CheckboxType::class, [
-                'label' => 'Featured on homepage',
+            ->add('cover', FileType::class, [
+                'label'    => 'Cover Photo / Poster',
+                'mapped'   => false,
                 'required' => false,
+                'attr'     => ['accept' => 'image/*'],
+                'constraints' => [
+                    new File([
+                        'maxSize'          => '5M',
+                        'mimeTypes'        => ['image/jpeg', 'image/png', 'image/webp'],
+                        'mimeTypesMessage' => 'Please upload a valid image (JPG, PNG or WebP).',
+                    ]),
+                ],
             ])
-            ->add('tags', ChoiceType::class, [
-                'label' => 'Tags',
-                'choices' => self::AVAILABLE_TAGS,
-                'multiple' => true,
-                'expanded' => true, // Renders as checkboxes instead of a multi-select
-                'required' => false,
-            ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Event::class,
             'csrf_protection' => true,
             'csrf_field_name' => '_token',
-            'csrf_token_id' => 'event',
-            'is_edit' => false, // Set to true when editing an existing event
+            'csrf_token_id'   => 'event',
         ]);
-
-        $resolver->setAllowedTypes('is_edit', 'bool');
     }
 }

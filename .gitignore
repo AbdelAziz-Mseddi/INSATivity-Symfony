@@ -1,39 +1,10 @@
-# --- SYMFONY ---
+
+###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
 /.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
 /vendor/
-/config/secrets/prod/prod.decrypt.private.php
-
-# --- PHPUNIT ---
-/phpunit.xml
-.phpunit.result.cache
-
-# --- FICHIERS PROJET & UPLOADS ---
-/uploads/
-assets/uploads/
-/storage/
-/cache/
-/logs/
-/temp/
-*.log
-
-# --- NODE & FRONTEND ---
-node_modules/
-.parcel-cache/
-.vite/
-.next/
-.nuxt/
-
-# --- IDE & SYSTÈME ---
-/.idea/
-.vscode/
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
-.project
-.settings/
+###< symfony/framework-bundle ###

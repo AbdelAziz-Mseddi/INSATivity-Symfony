@@ -142,7 +142,16 @@
     font-weight: 700;
     font-size: 1.5rem;
     letter-spacing: 1px;
+    overflow: hidden;
 }
+
+.club-logo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
 
 .club-home-title {
     display: flex;

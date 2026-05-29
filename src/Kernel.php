@@ -3,51 +3,21 @@
 namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
-    protected function configureContainer(ContainerConfigurator $container): void
+    public function boot(): void
     {
-        $container->import('../config/{packages}/*.yaml');
-        $container->import('../config/{packages}/'.$this->environment.'/*.yaml');
+        parent::boot();
 
-        if (is_file(\dirname(__DIR__).'/config/services.yaml')) {
-            $container->import('../config/services.yaml');
-           $container->import('../config/services_'.$this->environment.'.yaml');
-          $container->import('../config/services_dev.yaml');
-
-
-        } elseif (is_file($path = \dirname(__DIR__).'/config/services.php')) {
-            (require $path)($container->withPath($path), $this);
-        }
-    }
-
-    protected function configureRoutes(RoutingConfigurator $routes): void
-    {
-        // Canonical Symfony routing import: config/routes/<env>/*, then
-        // config/routes/* (framework, web_profiler, ...), then config/routes.yaml.
-        $routes->import('../config/{routes}/'.$this->environment.'/*.{php,yaml}');
-        $routes->import('../config/{routes}/*.{php,yaml}');
-
-        if (is_file(\dirname(__DIR__).'/config/routes.yaml')) {
-            $routes->import('../config/routes.yaml');
-        } elseif (is_file($path = \dirname(__DIR__).'/config/routes.php')) {
-            (require $path)($routes->withPath($path), $this);
-        }
-    }
-
-    public function registerBundles(): iterable
-    {
-        $contents = require $this->getProjectDir().'/config/bundles.php';
-        foreach ($contents as $class => $envs) {
-            if ($envs[$this->environment] ?? $envs['all'] ?? false) {
-                yield new $class();
-            }
+        if (class_exists(\Doctrine\DBAL\Types\Type::class)) {
+            \Doctrine\DBAL\Types\Type::overrideType('datetime', \Doctrine\DBAL\Types\VarDateTimeType::class);
+            \Doctrine\DBAL\Types\Type::overrideType('datetimetz', \Doctrine\DBAL\Types\VarDateTimeType::class);
+            \Doctrine\DBAL\Types\Type::overrideType('datetime_immutable', \Doctrine\DBAL\Types\VarDateTimeImmutableType::class);
+            \Doctrine\DBAL\Types\Type::overrideType('datetimetz_immutable', \Doctrine\DBAL\Types\VarDateTimeImmutableType::class);
         }
     }
 }

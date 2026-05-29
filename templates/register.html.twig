@@ -2,21 +2,28 @@
 
 {% block title %}INSATivity | Register{% endblock %}
 
+{% block body_class %}login-body{% endblock %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="/styles/page.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    .main-header { display: none !important; }
+    body.login-body {
+        background-color: #0b090a !important;
+    }
+  </style>
+{% endblock %}
+
 {% block body %}
-  <div class="bg-image register-bg"></div>
-  <video autoplay muted loop class="stars-overlay">
-    <source src="{{ asset('assets/twinkling_stars_background.mp4') }}" type="video/mp4">
+  <div class="bg-image register-bg" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;"></div>
+  <video autoplay muted loop class="stars-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -1; opacity: 0.6;">
+    <source src="/assets/twinkling_stars_background.mp4" type="video/mp4">
   </video>
-
-  <div class="glass-container register-card">
-    <form action="{{ path('app_register') }}" method="POST" class="login-form">
+  <div class="glass-container register-card" style="position: relative; z-index: 1;">
+    <form action="#" class="login-form">
       <h1>Register</h1>
-
-      <div id="register-message" class="login-message">
-        {% if error %}
-          <p class="text-danger">{{ error }}</p>
-        {% endif %}
-      </div>
+      <div id="register-message" class="login-message"></div>
 
       <div class="input-box">
         <input type="text" placeholder="Full Name" name="fullName" required />
@@ -30,7 +37,9 @@
 
       <div class="input-box email-group">
         <input type="text" placeholder="University Email" name="email" required />
+
         <span class="domain-suffix">@insat.ucar.tn</span>
+
         <i class="fa-solid fa-envelope"></i>
       </div>
 
@@ -71,8 +80,12 @@
       </button>
 
       <div class="register-link">
-        <p>Already have an account? <a href="{{ path('app_login') }}">Sign In</a></p>
+        <p>Already have an account? <a href="{{ path('login') }}">Sign In</a></p>
       </div>
     </form>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script type="module" src="/scripts/register.js"></script>
 {% endblock %}

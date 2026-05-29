@@ -1,27 +1,18 @@
-# This file is the entry point to configure your own services
-# Place the following lines at the top of the file to learn about service discovery and auto wiring
-# Learn more about service discovery and auto-wiring in Symfony docs
-# https://symfony.com/doc/current/service_container.html#services-load-classes-namespace-as-service
-
 parameters:
-  env(DATABASE_URL): ''
 
 services:
-  # default configuration for services in *this* file
-  _defaults:
-    autowire: true      # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    _defaults:
+        autowire: true
+        autoconfigure: true
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
-  App\:
-    resource: '../src/'
-    exclude:
-      - '../src/DependencyInjection/'
-      - '../src/Entity/'
-      - '../src/Kernel.php'
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
 
-  # Configuration du service pour la gestion des médias
-  App\Service\MediaService:
-    arguments:
-      $targetDirectory: '%kernel.project_dir%/public/assets/uploads'
+    App\Service\JWTService:
+        arguments:
+            $secret: '%env(JWT_SECRET)%'
+
