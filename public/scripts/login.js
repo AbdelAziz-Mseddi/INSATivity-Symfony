@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await API.login(username, password);
             showMessage("Login successful! Redirecting...", false);
             setTimeout(() => {
-                window.location.href = "index.html";
+                window.location.href = "/";
             }, 1000);
         } catch (error) {
             showMessage(error.message || "Erreur serveur. Veuillez réessayer plus tard.");

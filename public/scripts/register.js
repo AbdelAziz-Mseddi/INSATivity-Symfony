@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await API.register({ fullName, username, email, major, password });
             showMessage("Account created! Redirecting...", false);
             setTimeout(() => {
-                window.location.href = "index.html";
+                window.location.href = "/";
             }, 1000);
         } catch (error) {
             showMessage(error.message || "Erreur serveur. Veuillez réessayer plus tard.");
