@@ -1,4 +1,5 @@
-# Load attribute routes from all controllers (API + Frontend pages).
 controllers:
-  resource: '../src/Controller/'
-  type: attribute
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute

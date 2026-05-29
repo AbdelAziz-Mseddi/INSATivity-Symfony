@@ -16,15 +16,12 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
-    /**
-     * Remplace la méthode findByEmailOrUsername de ton PHP natif
-     */
-    public function findByEmailOrUsername(string $login): ?User
+    public function findByEmailOrUsername(string $val): ?User
     {
         return $this->createQueryBuilder('u')
-            ->where('u.username = :login')
-            ->orWhere('u.email = :login')
-            ->setParameter('login', $login)
+            ->where('u.username = :val')
+            ->orWhere('u.email = :val')
+            ->setParameter('val', $val)
             ->getQuery()
             ->getOneOrNullResult();
     }

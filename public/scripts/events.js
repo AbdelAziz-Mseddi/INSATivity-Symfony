@@ -1,28 +1,17 @@
+import { API } from './api.js';
+
 // Event data - loaded from PHP API
 let eventsData = [];
 
-// Load events from the Symfony JSON API
+// Load events from PHP API
 async function loadEvents() {
-  // Only run on the events feed page (skip login/clubs/calendar/etc.).
-  if (!document.querySelector(".featured-grid") && !document.querySelector(".upcoming-section")) {
-    return;
-  }
-
   try {
-    const response = await fetch("/api/events", { method: "GET" });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-
-    if (result.success && result.data) {
-      eventsData = result.data;
+    const data = await API.getEvents();
+    
+    if (data) {
+      eventsData = data;
       renderFeaturedEvents();
       renderUpcomingEvents();
-    } else {
-      console.error("Error from API:", result.error || result.message);
     }
   } catch (error) {
     console.error("Error loading events from API:", error);
@@ -37,10 +26,12 @@ function renderFeaturedEvents() {
   // Clear existing events
   featuredGrid.innerHTML = "";
 
-  // Filter and render featured events
-  const featured = eventsData.filter((event) => event.featured);
+  // Display at most 3 approved featured events
+  const featuredEvents = eventsData
+    .filter((event) => event.featured && event.is_approved)
+    .slice(0, 3);
 
-  featured.forEach((event) => {
+  featuredEvents.forEach((event) => {
     const eventCard = document.createElement("div");
     eventCard.className = "event-card-featured";
     eventCard.innerHTML = `
@@ -76,9 +67,12 @@ function renderUpcomingEvents() {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  // Filter events that haven't happened yet and sort by date
-  const upcoming = [...eventsData]
-    .filter((event) => new Date(event.date) >= now)
+  // Filter events that haven't happened yet and are approved
+  const upcoming = eventsData
+    .filter((event) => {
+      const eventDateTime = new Date(`${event.date}T${event.time}`);
+      return event.is_approved && eventDateTime >= now;
+    })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   upcoming.forEach((event) => {
@@ -126,21 +120,9 @@ function viewEvent(eventId) {
 // Add a new event
 async function addEvent(eventObj) {
   try {
-    const response = await fetch("../backend/events.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(eventObj),
-    });
-
-    const result = await response.json();
-    if (!response.ok || result.status !== "success") {
-      throw new Error((result.errors && result.errors[0]) || "Failed to create event");
-    }
-
+    const data = await API.createEvent(eventObj);
     await loadEvents();
-    return result.data;
+    return data;
   } catch (error) {
     console.error("Error creating event:", error);
     return null;
@@ -150,15 +132,7 @@ async function addEvent(eventObj) {
 // Remove an event by ID
 async function removeEvent(eventId) {
   try {
-    const response = await fetch(`../backend/events.php?id=${encodeURIComponent(eventId)}`, {
-      method: "DELETE",
-    });
-
-    const result = await response.json();
-    if (!response.ok || result.status !== "success") {
-      throw new Error((result.errors && result.errors[0]) || "Failed to delete event");
-    }
-
+    await API.deleteEvent(eventId);
     await loadEvents();
     return true;
   } catch (error) {
@@ -170,21 +144,9 @@ async function removeEvent(eventId) {
 // Update an event
 async function updateEvent(eventId, updates) {
   try {
-    const response = await fetch(`../backend/events.php?id=${encodeURIComponent(eventId)}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updates),
-    });
-
-    const result = await response.json();
-    if (!response.ok || result.status !== "success") {
-      throw new Error((result.errors && result.errors[0]) || "Failed to update event");
-    }
-
+    const data = await API.updateEvent(eventId, updates);
     await loadEvents();
-    return result.data;
+    return data;
   } catch (error) {
     console.error("Error updating event:", error);
     return null;
@@ -200,6 +162,13 @@ function getAllEvents() {
 function getEventById(eventId) {
   return eventsData.find((e) => e.id === eventId);
 }
+
+// Make globally available if needed
+window.addEvent = addEvent;
+window.removeEvent = removeEvent;
+window.updateEvent = updateEvent;
+window.getAllEvents = getAllEvents;
+window.getEventById = getEventById;
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {

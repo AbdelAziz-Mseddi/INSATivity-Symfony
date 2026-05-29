@@ -2,80 +2,68 @@
 
 namespace App\Entity;
 
-use App\Repository\EventRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: EventRepository::class)]
-#[ORM\Table(name: '`events`')]
-#[ORM\Index(name: 'idx_events_event_date', columns: ['event_date'])]
-#[ORM\Index(name: 'idx_events_featured', columns: ['featured'])]
+#[ORM\Entity]
+#[ORM\Table(name: 'events')]
 class Event
 {
-    // The legacy events.id column is a plain BIGINT (no sequence), so IDs are
-    // assigned by the application (see EventRepository::nextId), matching the
-    // original PHP backend.
     #[ORM\Id]
-    #[ORM\Column(type: Types::BIGINT)]
+    #[ORM\Column(type: 'bigint')]
     private ?string $id = null;
 
     #[ORM\ManyToOne(targetEntity: Club::class, inversedBy: 'events')]
     #[ORM\JoinColumn(name: 'club_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?Club $club = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $title = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $image = null;
 
-    #[ORM\Column(name: 'event_date', type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'event_date', type: 'date')]
     private ?\DateTimeInterface $eventDate = null;
 
-    #[ORM\Column(name: 'event_time', type: Types::TIME_MUTABLE)]
+    #[ORM\Column(name: 'event_time', type: 'time')]
     private ?\DateTimeInterface $eventTime = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $location = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $description = null;
 
-    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $participants = 0;
 
-    #[ORM\Column(name: 'max_participants', type: Types::INTEGER, options: ['default' => 0])]
+    #[ORM\Column(name: 'max_participants', type: 'integer', options: ['default' => 0])]
     private int $maxParticipants = 0;
 
-    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $featured = false;
 
-    #[ORM\Column(name: 'is_approved', type: Types::BOOLEAN, options: ['default' => false])]
+    #[ORM\Column(name: 'is_approved', type: 'boolean', options: ['default' => false])]
     private bool $isApproved = false;
 
-    #[ORM\Column(name: 'created_at', type: Types::DATETIMETZ_IMMUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column(name: 'created_at', type: 'datetimetz', options: ['default' => 'CURRENT_TIMESTAMP'])]
+    private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(name: 'updated_at', type: Types::DATETIMETZ_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[ORM\Column(name: 'updated_at', type: 'datetimetz', options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeInterface $updatedAt = null;
-
-    #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $tags = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
-
-    // --- GETTERS & SETTERS ---
 
     public function getId(): ?string
     {
         return $this->id;
     }
 
-    public function setId(string $id): static
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
@@ -86,7 +74,7 @@ class Event
         return $this->club;
     }
 
-    public function setClub(?Club $club): static
+    public function setClub(?Club $club): self
     {
         $this->club = $club;
         return $this;
@@ -97,7 +85,7 @@ class Event
         return $this->title;
     }
 
-    public function setTitle(string $title): static
+    public function setTitle(string $title): self
     {
         $this->title = $title;
         return $this;
@@ -108,7 +96,7 @@ class Event
         return $this->image;
     }
 
-    public function setImage(string $image): static
+    public function setImage(string $image): self
     {
         $this->image = $image;
         return $this;
@@ -119,7 +107,7 @@ class Event
         return $this->eventDate;
     }
 
-    public function setEventDate(\DateTimeInterface $eventDate): static
+    public function setEventDate(\DateTimeInterface $eventDate): self
     {
         $this->eventDate = $eventDate;
         return $this;
@@ -130,7 +118,7 @@ class Event
         return $this->eventTime;
     }
 
-    public function setEventTime(\DateTimeInterface $eventTime): static
+    public function setEventTime(\DateTimeInterface $eventTime): self
     {
         $this->eventTime = $eventTime;
         return $this;
@@ -141,7 +129,7 @@ class Event
         return $this->location;
     }
 
-    public function setLocation(string $location): static
+    public function setLocation(string $location): self
     {
         $this->location = $location;
         return $this;
@@ -152,7 +140,7 @@ class Event
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(string $description): self
     {
         $this->description = $description;
         return $this;
@@ -163,7 +151,7 @@ class Event
         return $this->participants;
     }
 
-    public function setParticipants(int $participants): static
+    public function setParticipants(int $participants): self
     {
         $this->participants = $participants;
         return $this;
@@ -174,7 +162,7 @@ class Event
         return $this->maxParticipants;
     }
 
-    public function setMaxParticipants(int $maxParticipants): static
+    public function setMaxParticipants(int $maxParticipants): self
     {
         $this->maxParticipants = $maxParticipants;
         return $this;
@@ -185,7 +173,7 @@ class Event
         return $this->featured;
     }
 
-    public function setFeatured(bool $featured): static
+    public function setFeatured(bool $featured): self
     {
         $this->featured = $featured;
         return $this;
@@ -196,13 +184,13 @@ class Event
         return $this->isApproved;
     }
 
-    public function setIsApproved(bool $isApproved): static
+    public function setIsApproved(bool $isApproved): self
     {
         $this->isApproved = $isApproved;
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -212,42 +200,23 @@ class Event
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
         return $this;
     }
 
-    public function getTags(): ?array
-    {
-        return $this->tags;
-    }
-
-    public function setTags(?array $tags): static
-    {
-        $this->tags = $tags;
-        return $this;
-    }
-
-    // --- LOGIQUE METIER TRANSFEREE ---
-
-    /**
-     * Remplace la méthode getEventStatus() de l'ancien modèle.
-     * Calcule dynamiquement le statut sans le stocker inutilement en base.
-     */
     public function getStatus(): string
     {
-        $now = new \DateTime();
-
-        if ($this->eventDate === null || $this->eventTime === null) {
-            return 'finished';
+        $currentDate = new \DateTime('today');
+        $eventDate = $this->eventDate ? clone $this->eventDate : new \DateTime();
+        if ($this->eventTime) {
+            $eventDate->setTime(
+                (int)$this->eventTime->format('H'),
+                (int)$this->eventTime->format('i'),
+                0
+            );
         }
-
-        $eventDateTime = \DateTime::createFromFormat(
-            'Y-m-d H:i:s',
-            $this->eventDate->format('Y-m-d') . ' ' . $this->eventTime->format('H:i:s')
-        );
-
-        return $eventDateTime > $now ? 'published' : 'finished';
+        return $eventDate > $currentDate ? 'published' : 'finished';
     }
 }

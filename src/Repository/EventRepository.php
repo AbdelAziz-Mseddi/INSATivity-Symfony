@@ -16,10 +16,7 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
-    /**
-     * Remplace fetchEvents() pour avoir tous les événements triés
-     */
-    public function findAllOrdered(): array
+    public function findAllEventsOrdered(): array
     {
         return $this->createQueryBuilder('e')
             ->orderBy('e.eventDate', 'DESC')
@@ -29,31 +26,25 @@ class EventRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * Remplace getEventsByClub()
-     */
-    public function findByClubName(string $clubName): array
+    public function getEventsByClubName(string $clubName): array
     {
         return $this->createQueryBuilder('e')
-            ->join('e.club', 'c')
+            ->innerJoin('e.club', 'c')
             ->where('LOWER(c.name) = LOWER(:clubName)')
-            ->setParameter('clubName', $clubName)
+            ->setParameter('clubName', trim($clubName))
             ->orderBy('e.eventDate', 'DESC')
+            ->addOrderBy('e.eventTime', 'DESC')
+            ->addOrderBy('e.id', 'DESC')
             ->getQuery()
             ->getResult();
     }
 
-    /**
-     * Next event id (MAX(id) + 1), mirroring the legacy backend since the
-     * events.id column has no database sequence.
-     */
-    public function nextId(): int
+    public function getNextEventId(): int
     {
-        $max = (int) $this->createQueryBuilder('e')
+        $result = $this->createQueryBuilder('e')
             ->select('MAX(e.id)')
             ->getQuery()
             ->getSingleScalarResult();
-
-        return $max + 1;
+        return ((int)$result) + 1;
     }
 }

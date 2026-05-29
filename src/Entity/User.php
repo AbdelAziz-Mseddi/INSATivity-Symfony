@@ -2,99 +2,149 @@
 
 namespace App\Entity;
 
-
-use App\Repository\UserRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`users`')]
-#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
-#[UniqueEntity(fields: ['username'], message: 'Ce nom d\'utilisateur est déjà pris.')]
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(type: Types::BIGINT)]
+    #[ORM\Column(type: 'bigint')]
     private ?string $id = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(name: 'full_name', type: 'text')]
     private ?string $fullName = null;
 
-    #[ORM\Column(type: Types::TEXT, unique: true)]
+    #[ORM\Column(type: 'text', unique: true)]
     private ?string $username = null;
 
-    #[ORM\Column(type: Types::TEXT, unique: true)]
+    #[ORM\Column(type: 'text', unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $major = null;
 
-    #[ORM\Column(name: 'password_hash', type: Types::TEXT)]
-    private ?string $password = null;
+    #[ORM\Column(name: 'password_hash', type: 'text')]
+    private ?string $passwordHash = null;
 
-    #[ORM\Column(type: Types::TEXT, options: ['default' => 'student'])]
+    #[ORM\Column(type: 'text')]
     private string $role = 'student';
 
-    #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    // A user with club_id set is that club's moderator (one moderator per club).
-    // NULL = normal user. Admins manage every club regardless of this field.
-    #[ORM\Column(name: 'club_id', type: Types::TEXT, nullable: true)]
-    private ?string $clubId = null;
+    #[ORM\Column(name: 'created_at', type: 'datetimetz', options: ['default' => 'CURRENT_TIMESTAMP'])]
+    private ?\DateTimeInterface $createdAt = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTime();
     }
 
-    // --- GETTERS & SETTERS ---
-    public function getId(): ?string { return $this->id; }
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
 
-    public function getFullName(): ?string { return $this->fullName; }
-    public function setFullName(string $fullName): static { $this->fullName = $fullName; return $this; }
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
 
-    public function getUsername(): ?string { return $this->username; }
-    public function setUsername(string $username): static { $this->username = $username; return $this; }
+    public function setFullName(string $fullName): self
+    {
+        $this->fullName = $fullName;
+        return $this;
+    }
 
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): static { $this->email = $email; return $this; }
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
 
-    public function getMajor(): ?string { return $this->major; }
-    public function setMajor(string $major): static { $this->major = $major; return $this; }
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+        return $this;
+    }
 
-    public function getRole(): string { return $this->role; }
-    public function setRole(string $role): static { $this->role = $role; return $this; }
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
 
-    public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+        return $this;
+    }
 
-    public function getClubId(): ?string { return $this->clubId; }
-    public function setClubId(?string $clubId): static { $this->clubId = $clubId; return $this; }
+    public function getMajor(): ?string
+    {
+        return $this->major;
+    }
 
-    /** True when this user is a club moderator (has a club assigned). */
-    public function isModerator(): bool { return $this->clubId !== null && $this->clubId !== ''; }
-    public function isAdmin(): bool { return strtolower($this->role) === 'admin'; }
+    public function setMajor(string $major): self
+    {
+        $this->major = $major;
+        return $this;
+    }
 
-    public function getPassword(): string { return $this->password; }
-    public function setPassword(string $password): static { $this->password = $password; return $this; }
+    public function getPassword(): ?string
+    {
+        return $this->passwordHash;
+    }
 
-    // --- METHODES DE SECURITE SYMFONY ---
-    /**
-     * Un identifiant visuel qui représente l'utilisateur (utilisé par Symfony).
-     */
-    public function getUserIdentifier(): string { return (string) $this->username; }
-    /**
-     * Gère la hiérarchie des rôles.
-     */
-    public function getRoles(): array { return array_unique(['ROLE_USER', 'ROLE_' . strtoupper($this->role)]); }
-    /**
-     * Si on stocke des données sensibles temporaires sur l'objet, on les nettoie ici.
-     * En général, on la laisse vide.
-     */
-    public function eraseCredentials(): void {}
+    public function getPasswordHash(): ?string
+    {
+        return $this->passwordHash;
+    }
 
+    public function setPasswordHash(string $passwordHash): self
+    {
+        $this->passwordHash = $passwordHash;
+        return $this;
+    }
+
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = [];
+        if ($this->role === 'admin') {
+            $roles[] = 'ROLE_ADMIN';
+        } else {
+            $roles[] = 'ROLE_USER';
+        }
+        return array_unique($roles);
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->username ?? '';
+    }
 }

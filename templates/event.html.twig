@@ -1,48 +1,94 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event | INSATivity{% endblock %}
+{% block title %}
+  {% if event %}{{ event.title }} | INSATivity{% else %}Event | INSATivity{% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="/styles/event.css" />
+{% endblock %}
 
 {% block body %}
-  <div class="image_side" style="background-image: url('{{ event.image }}'); background-size: cover; background-position: center;"></div>
-
-  <div class="content_side">
-    <section class="left">
-      <h1>{{ event.title }}</h1>
-      <span>{{ event.club }}</span>
-      
-      <div class="event-info-grid">
-        <div class="info-item">
-          <strong><i class="fas fa-calendar-alt"></i> Date</strong>
-          <span>{{ event.date }}</span>
-        </div>
-        <div class="info-item">
-          <strong><i class="fas fa-clock"></i> Time</strong>
-          <span>{{ event.time }}</span>
-        </div>
-        <div class="info-item">
-          <strong><i class="fas fa-map-marker-alt"></i> Location</strong>
-          <span>{{ event.location }}</span>
-        </div>
-      </div>
-
-      <div class="description-box">
-        <p>{{ event.description }}</p>
-      </div>
-    </section>
-
-    <aside class="right">
-      <div class="action-card">
-        <div class="participants-line">
-          <div class="progress" style="width: {{ event.maxParticipants > 0 ? (event.participants / event.maxParticipants) * 100 : 0 }}%">
-            {{ event.participants }} / {{ event.maxParticipants }} participants
+  <div class="event-detail-wrapper" style="display: flex; min-height: calc(100vh - 70px);">
+    <div class="image_side" id="eventImage" {% if event %}style="background-image: url('{{ event.image|replace({'../': '/'}) }}'); background-size: cover; background-position: center;"{% endif %}></div>
+    <div class="content_side" style="padding: 40px; flex: 1;">
+      <section class="left">
+        <h1 id="eventTitle">{% if event %}{{ event.title }}{% else %}NAME OF THE EVENT{% endif %}</h1>
+        <span id="eventClub">{% if event %}{{ event.club.name }}{% else %}name of the club{% endif %}</span>
+        
+        <div class="event-info-grid">
+          <div class="info-item">
+            <strong><i class="fas fa-calendar-alt"></i> Date</strong>
+            <span id="eventDate">{% if event %}{{ event.eventDate|date('F d, Y') }}{% else %}date{% endif %}</span>
+          </div>
+          <div class="info-item">
+            <strong><i class="fas fa-clock"></i> Time</strong>
+            <span id="eventTime">{% if event %}{{ event.eventTime|date('H:i') }}{% else %}time{% endif %}</span>
+          </div>
+          <div class="info-item">
+            <strong><i class="fas fa-map-marker-alt"></i> Location</strong>
+            <span id="eventLocation">{% if event %}{{ event.location }}{% else %}place{% endif %}</span>
           </div>
         </div>
-        <button class="btn-action btn-primary"><i class="fas fa-user-plus"></i> Register Now</button>
-        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-          <button class="btn-action btn-outline"><i class="fas fa-calendar-plus"></i> Add to Calendar</button>
-          <button class="btn-action btn-outline"><i class="fas fa-share-alt"></i> Share Event</button>
+
+        <div class="description-box">
+          <p id="eventDescription">{% if event %}{{ event.description }}{% else %}texte{% endif %}</p>
         </div>
-      </div>
-    </aside>
+      </section>
+
+      <aside class="right">
+        <div class="action-card">
+          <div class="participants-line">
+            {% if event %}
+              {% set percent = (event.participants / (event.maxParticipants ?: 1)) * 100 %}
+              <div class="progress" id="eventProgress" style="width: {{ percent }}%">{{ event.participants }} / {{ event.maxParticipants }} participants</div>
+            {% else %}
+              <div class="progress" id="eventProgress" style="width: 0%">0 / 0 participants</div>
+            {% endif %}
+          </div>
+          <button class="btn-action btn-primary"><i class="fas fa-user-plus"></i> Register Now</button>
+          <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-action btn-outline"><i class="fas fa-calendar-plus"></i> Add to Calendar</button>
+            <button class="btn-action btn-outline"><i class="fas fa-share-alt"></i> Share Event</button>
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      {% if event is null %}
+      const eventData = sessionStorage.getItem("currentEvent");
+      if (eventData) {
+        const event = JSON.parse(eventData);
+
+        document.getElementById("eventTitle").textContent = event.title;
+        document.getElementById("eventClub").textContent = event.club;
+        document.getElementById("eventDate").textContent = new Date(event.date + 'T00:00:00').toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        document.getElementById("eventTime").textContent = event.time;
+        document.getElementById("eventLocation").textContent = event.location;
+        document.getElementById("eventDescription").textContent = event.description;
+
+        const maxP = event.maxParticipants || 1;
+        const progressPercent = (event.participants / maxP) * 100;
+        const progressEl = document.getElementById("eventProgress");
+        progressEl.style.width = progressPercent + "%";
+        progressEl.textContent = `${event.participants} / ${event.maxParticipants} participants`;
+
+        const imageDiv = document.getElementById("eventImage");
+        const imgPath = event.image ? event.image.replace('../', '/') : '';
+        imageDiv.style.backgroundImage = `url('${imgPath}')`;
+        imageDiv.style.backgroundSize = "cover";
+        imageDiv.style.backgroundPosition = "center";
+      }
+      {% endif %}
+    });
+  </script>
 {% endblock %}

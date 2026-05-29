@@ -2,6 +2,10 @@
 
 {% block title %}INSATivity | Clubs{% endblock %}
 
+{% block stylesheets %}
+  <link rel="stylesheet" href="/styles/page.css" />
+{% endblock %}
+
 {% block body %}
   <div class="container pb-5">
     <div class="hero-section">
@@ -10,7 +14,6 @@
         Discover and join clubs that match your interests and passions.
       </p>
     </div>
-
     <div class="d-flex justify-content-center gap-2 mb-5 flex-wrap">
       <button class="btn btn-dark rounded-pill px-4 filter-btn" data-category="All">All</button>
       <button class="btn btn-white bg-white border rounded-pill px-4 filter-btn" data-category="Technology">
@@ -26,20 +29,62 @@
         Social
       </button>
     </div>
-
     <div class="row g-4" id="clubs-container">
-      {# Exemple d’affichage dynamique #}
       {% for club in clubs %}
-        <div class="col-md-4">
-          <div class="card h-100">
-            <img src="{{ club.logo }}" class="card-img-top" alt="{{ club.name }}">
+        <div class="col-md-6 col-lg-4 club-card-col" data-category="{{ club.category }}">
+          <div class="card-club">
+            <div class="card-img-wrapper">
+              <span class="category-badge">{{ club.category }}</span>
+              <img
+                src="{{ club.banner|replace({'../': '/'}) }}"
+                alt="{{ club.name }} club"
+                class="card-img-top"
+              />
+            </div>
             <div class="card-body">
-              <h5 class="card-title">{{ club.name }}</h5>
-              <p class="card-text">{{ club.description }}</p>
+              <div class="club-title">{{ club.name }}</div>
+              <p class="club-desc">{{ club.description }}</p>
+              <div class="card-footer-custom">
+                <div class="d-flex gap-2">
+                  <a href="{{ path('club_dashboard', {'club': club.id}) }}" class="btn-view">View Club</a>
+                  <button class="btn-join">Join</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const cards = document.querySelectorAll('.club-card-col');
+
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          filterButtons.forEach(btn => {
+            btn.classList.remove('btn-dark');
+            btn.classList.add('bg-white', 'border');
+          });
+
+          button.classList.add('btn-dark');
+          button.classList.remove('bg-white', 'border');
+
+          const category = button.getAttribute('data-category');
+
+          cards.forEach(card => {
+            if (category === 'All' || card.getAttribute('data-category') === category) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+  </script>
 {% endblock %}

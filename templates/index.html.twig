@@ -1,24 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}INSATivity | Events{% endblock %}
+{% block title %}INSATivity | Home{% endblock %}
+
+{% block stylesheets %}
+  <link rel="stylesheet" href="/styles/homepage.css" />
+{% endblock %}
 
 {% block body %}
-  <section class="hero-section">
-    <h1>
-      Discover Campus <span style="color: var(--deep-red)">Events</span>
-    </h1>
-    <p>
-      Find exciting events, connect with clubs, and make the most of your
-      university experience.
-    </p>
-  </section>
+  <div class="dashboard-container">
+    <section class="hero-section">
+      <h1>
+        Discover Campus <span style="color: var(--deep-red)">Events</span>
+      </h1>
+      <p>
+        Find exciting events, connect with clubs, and make the most of your
+        university experience.
+      </p>
+    </section>
 
-  <section class="featured-section">
-    <h2 class="section-title">Featured Events</h2>
-    <div class="featured-grid"></div>
-  </section>
+    <section class="featured-section">
+      <h2 class="section-title">Featured Events</h2>
+      <div class="featured-grid">
+        {% set featured_count = 0 %}
+        {% for event in events %}
+          {% if event.featured and event.isApproved and featured_count < 3 %}
+            {% set featured_count = featured_count + 1 %}
+            <div class="event-card-featured" onclick="window.location.href='{{ path('event_detail', {'id': event.id}) }}'">
+              <img src="{{ event.image|replace({'../': '/'}) }}" class="featured-bg" alt="{{ event.title }}" />
+              <div class="featured-overlay">
+                <div class="club-tag">
+                  {% if event.club and event.club.logo %}
+                    <img src="{{ event.club.logo|replace({'../': '/'}) }}" alt="{{ event.club.name }} logo" /> {{ event.club.name }}
+                  {% endif %}
+                </div>
+                <h3>{{ event.title }}</h3>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% if featured_count == 0 %}
+          <p class="text-muted">No featured events found.</p>
+        {% endif %}
+      </div>
+    </section>
 
-  <section class="upcoming-section">
-    <h2 class="section-subtitle">Upcoming Events</h2>
-  </section>
+    <section class="upcoming-section">
+      <h2 class="section-subtitle">Upcoming Events</h2>
+      <div class="events-container">
+        {% set upcoming_count = 0 %}
+        {% for event in events %}
+          {% if event.isApproved and event.eventDate|date('Ymd') >= 'now'|date('Ymd') %}
+            {% set upcoming_count = upcoming_count + 1 %}
+            <div class="small-event-card" onclick="window.location.href='{{ path('event_detail', {'id': event.id}) }}'">
+              <div class="thumb">
+                <img src="{{ event.image|replace({'../': '/'}) }}" alt="{{ event.title }}" />
+              </div>
+              <div class="small-card-content">
+                <div class="club-tag">
+                  {% if event.club and event.club.logo %}
+                    <img src="{{ event.club.logo|replace({'../': '/'}) }}" alt="{{ event.club.name }} logo" /> {{ event.club.name }}
+                  {% endif %}
+                </div>
+                <h4>{{ event.title }}</h4>
+                <p><i class="far fa-calendar"></i> {{ event.eventDate|date('M d, Y') }} at {{ event.eventTime|date('H:i') }}</p>
+                <p><i class="far fa-map-pin"></i> {{ event.location }}</p>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% if upcoming_count == 0 %}
+          <p class="text-muted">No upcoming events found.</p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
 {% endblock %}
