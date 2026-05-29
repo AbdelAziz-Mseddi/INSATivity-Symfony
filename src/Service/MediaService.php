@@ -35,4 +35,25 @@ class MediaService
     {
         return $this->targetDirectory;
     }
+
+    /**
+     * Deletes an uploaded file. Guards against path traversal: only files that
+     * actually resolve inside the uploads directory may be removed.
+     */
+    public function delete(string $relativePath): void
+    {
+        $clean = str_replace(['..', '\\'], ['', '/'], $relativePath);
+        // Accept paths like "assets/uploads/foo.jpg" or just "foo.jpg".
+        $fileName = basename($clean);
+        $fullPath = rtrim($this->targetDirectory, '/') . '/' . $fileName;
+
+        $real = realpath($fullPath);
+        $base = realpath($this->targetDirectory);
+
+        if ($real === false || $base === false || !str_starts_with($real, $base)) {
+            throw new \Exception('File not found');
+        }
+
+        unlink($real);
+    }
 }

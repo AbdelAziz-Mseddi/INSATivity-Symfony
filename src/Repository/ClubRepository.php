@@ -15,4 +15,22 @@ class ClubRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Club::class);
     }
+
+    /** Case-insensitive lookup by club name (used to resolve an event's club). */
+    public function findOneByNameCI(string $name): ?Club
+    {
+        return $this->createQueryBuilder('c')
+            ->where('LOWER(c.name) = LOWER(:name)')
+            ->setParameter('name', $name)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findAllOrdered(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

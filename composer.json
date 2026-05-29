@@ -28,7 +28,8 @@
     "vlucas/phpdotenv": "^5.5",
     "symfony/form": "6.1.*",
     "symfony/twig-bundle": "6.1.*",
-    "symfony/security-csrf": "6.1.*"
+    "symfony/security-csrf": "6.1.*",
+    "symfony/asset": "6.1.*"
   },
   "require-dev": {
     "symfony/maker-bundle": "^1.48",

@@ -33,7 +33,7 @@
     <aside class="right">
       <div class="action-card">
         <div class="participants-line">
-          <div class="progress" style="width: {{ (event.participants / event.maxParticipants) * 100 }}%">
+          <div class="progress" style="width: {{ event.maxParticipants > 0 ? (event.participants / event.maxParticipants) * 100 : 0 }}%">
             {{ event.participants }} / {{ event.maxParticipants }} participants
           </div>
         </div>

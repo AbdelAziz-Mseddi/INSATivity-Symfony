@@ -16,18 +16,26 @@ security:
             #relie pare-feu avec bdd
             provider: app_user_provider
 
+            # JSON API login (fetch with {username, password}).
             json_login:
               check_path: /api/auth/login
               username_path: username
               password_path: password
+              success_handler: App\Security\JsonLoginSuccessHandler
+              failure_handler: App\Security\JsonLoginFailureHandler
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            # Browser form login (the login.html page posts _username/_password).
+            form_login:
+              login_path: app_login
+              check_path: app_login
+              username_parameter: _username
+              password_parameter: _password
+              default_target_path: home
+              enable_csrf: false
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
             logout:
-              path : api_auth_logout
+              path: logout
+              target: app_login
 
 
 

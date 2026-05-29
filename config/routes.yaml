@@ -1,10 +1,4 @@
-
-api_routes:
-  resource: '../src/Controller/Api'
+# Load attribute routes from all controllers (API + Frontend pages).
+controllers:
+  resource: '../src/Controller/'
   type: attribute
-
-app:
-  path: /{file}.html
-  controller: App\Controller\Frontend\PageController::serve
-  requirements:
-    file: '.+'

@@ -29,15 +29,14 @@ class Kernel extends BaseKernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
+        // Canonical Symfony routing import: config/routes/<env>/*, then
+        // config/routes/* (framework, web_profiler, ...), then config/routes.yaml.
+        $routes->import('../config/{routes}/'.$this->environment.'/*.{php,yaml}');
+        $routes->import('../config/{routes}/*.{php,yaml}');
+
         if (is_file(\dirname(__DIR__).'/config/routes.yaml')) {
             $routes->import('../config/routes.yaml');
         } elseif (is_file($path = \dirname(__DIR__).'/config/routes.php')) {
-            (require $path)($routes->withPath($path), $this);
-        }
-
-        if (is_file(\dirname(__DIR__).'/config/routes/'.$this->environment.'.yaml')) {
-            $routes->import('../config/routes/'.$this->environment.'.yaml');
-        } elseif (is_file($path = \dirname(__DIR__).'/config/routes/'.$this->environment.'.php')) {
             (require $path)($routes->withPath($path), $this);
         }
     }

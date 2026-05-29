@@ -1,23 +1,28 @@
 // Event data - loaded from PHP API
 let eventsData = [];
 
-// Load events from PHP API
+// Load events from the Symfony JSON API
 async function loadEvents() {
+  // Only run on the events feed page (skip login/clubs/calendar/etc.).
+  if (!document.querySelector(".featured-grid") && !document.querySelector(".upcoming-section")) {
+    return;
+  }
+
   try {
-    const response = await fetch("../backend/events.php?action=getAll",{ method: 'GET'});
-    
+    const response = await fetch("/api/events", { method: "GET" });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
-    if (result.status === 'success' && result.data) {
+
+    if (result.success && result.data) {
       eventsData = result.data;
       renderFeaturedEvents();
       renderUpcomingEvents();
     } else {
-      console.error("Error from API:", result.errors || result.message);
+      console.error("Error from API:", result.error || result.message);
     }
   } catch (error) {
     console.error("Error loading events from API:", error);

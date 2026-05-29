@@ -12,8 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_events_featured', columns: ['featured'])]
 class Event
 {
+    // The legacy events.id column is a plain BIGINT (no sequence), so IDs are
+    // assigned by the application (see EventRepository::nextId), matching the
+    // original PHP backend.
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $id = null;
 
@@ -71,6 +73,12 @@ class Event
     public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): static
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getClub(): ?Club

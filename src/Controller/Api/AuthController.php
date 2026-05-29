@@ -2,7 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Api\ApiResponse;
+use App\Api\Serializer;
 use App\Entity\User;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,16 +16,22 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api/auth', name: 'api_auth_')]
 class AuthController extends AbstractController
 {
+    /**
+     * Login is handled by the json_login firewall (see security.yaml) and its
+     * success/failure handlers. This controller is only reached if the firewall
+     * is misconfigured.
+     */
     #[Route('/login', name: 'login', methods: ['POST'])]
     public function login(): JsonResponse
     {
-       return $this->json(['error' => 'Erreur de configuration du login ou identifiants invalides.'], 401);
+        return ApiResponse::error('Authentication handler not invoked.', 'LOGIN_MISCONFIGURED', 401);
     }
 
     #[Route('/register', name: 'register', methods: ['POST'])]
     public function register(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
+        UserRepository $users,
         EntityManagerInterface $em
     ): JsonResponse {
         $data     = json_decode($request->getContent(), true) ?? [];
@@ -33,11 +42,7 @@ class AuthController extends AbstractController
         $password = $data['password'] ?? '';
 
         if (!$fullName || !$username || !$email || !$major || !$password) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'All fields are required',
-                'code'    => 'MISSING_FIELDS',
-            ], 400);
+            return ApiResponse::error('All fields are required', 'MISSING_FIELDS');
         }
 
         $email = strtolower($email);
@@ -45,46 +50,33 @@ class AuthController extends AbstractController
             $email .= '@insat.ucar.tn';
         }
 
-        $existingUser = $em->getRepository(User::class)->findOneBy(['username' => $username]);
-        if ($existingUser) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Username already exists'
-            ], 409);
+        if ($users->findByEmailOrUsername($username) || $users->findByEmailOrUsername($email)) {
+            return ApiResponse::error('User with this email or username already exists', 'CONFLICT', 409);
         }
 
-        $user = new User();
-        $user->setUsername($username);
-        $user->setEmail($email);
-
-        if (method_exists($user, 'setFullName')) { $user->setFullName($fullName); }
-        if (method_exists($user, 'setMajor')) { $user->setMajor($major); }
-
-
-        $hashedPassword = $passwordHasher->hashPassword($user, $password);
-        $user->setPassword($hashedPassword);
+        $user = (new User())
+            ->setUsername($username)
+            ->setEmail($email)
+            ->setFullName($fullName)
+            ->setMajor($major)
+            ->setRole('student');
+        $user->setPassword($passwordHasher->hashPassword($user, $password));
 
         $em->persist($user);
         $em->flush();
 
-        return $this->json([
-            'success' => true,
-            'message' => 'User registered successfully'
-        ], 201);
+        return ApiResponse::success(['user' => Serializer::user($user)], 201, 'Registration successful');
     }
 
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function me(): JsonResponse
     {
+        /** @var User|null $user */
         $user = $this->getUser();
-
-        if (!$user) {
-            return $this->json(['error' => 'Not authenticated'], 401);
+        if (!$user instanceof User) {
+            return ApiResponse::error('Not authenticated', 'AUTH_MISSING', 401);
         }
 
-        return $this->json([
-            'username' => $user->getUserIdentifier(),
-            'roles'    => $user->getRoles()
-        ]);
+        return ApiResponse::success(['user' => Serializer::user($user)]);
     }
 }

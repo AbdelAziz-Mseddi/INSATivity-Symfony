@@ -42,6 +42,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeImmutable $createdAt = null;
 
+    // A user with club_id set is that club's moderator (one moderator per club).
+    // NULL = normal user. Admins manage every club regardless of this field.
+    #[ORM\Column(name: 'club_id', type: Types::TEXT, nullable: true)]
+    private ?string $clubId = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -66,6 +71,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRole(string $role): static { $this->role = $role; return $this; }
 
     public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
+
+    public function getClubId(): ?string { return $this->clubId; }
+    public function setClubId(?string $clubId): static { $this->clubId = $clubId; return $this; }
+
+    /** True when this user is a club moderator (has a club assigned). */
+    public function isModerator(): bool { return $this->clubId !== null && $this->clubId !== ''; }
+    public function isAdmin(): bool { return strtolower($this->role) === 'admin'; }
 
     public function getPassword(): string { return $this->password; }
     public function setPassword(string $password): static { $this->password = $password; return $this; }

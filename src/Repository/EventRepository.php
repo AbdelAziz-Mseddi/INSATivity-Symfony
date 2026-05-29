@@ -42,4 +42,18 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Next event id (MAX(id) + 1), mirroring the legacy backend since the
+     * events.id column has no database sequence.
+     */
+    public function nextId(): int
+    {
+        $max = (int) $this->createQueryBuilder('e')
+            ->select('MAX(e.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $max + 1;
+    }
 }
