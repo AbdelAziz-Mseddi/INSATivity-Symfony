@@ -13,6 +13,24 @@ export function normalizeText(value) {
     .toLowerCase();
 }
 
+export function getCurrentUser() {
+  try {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function canManageClub(user, clubId) {
+  if (!user) return false;
+
+  const role = normalizeText(user.role);
+  if (role === 'admin') return true;
+
+  return normalizeText(user.club_id) === normalizeText(clubId);
+}
+
 // for security against XSS (Cross-Site Scripting).
 export function escapeHtml(value) {
   return String(value || "")

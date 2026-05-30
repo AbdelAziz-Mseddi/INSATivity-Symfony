@@ -20,6 +20,9 @@ security:
         main:
             lazy: true
             provider: users_in_memory
+            logout:
+                path: /logout
+                target: login
 
     access_control:
         # Public API endpoints (login / register / OPTIONS preflight)

@@ -124,6 +124,29 @@ class ApiClient {
         });
     }
 
+    async approveEvent(id) {
+        return this.request(`/api/events/${id}/approve`, {
+            method: 'PATCH',
+            headers: this.getHeaders()
+        });
+    }
+
+    async reviewEvent(id, reviewData) {
+        return this.request(`/api/events/${id}/review`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(reviewData)
+        });
+    }
+
+    async submitEventFeedback(id, feedbackData) {
+        return this.request(`/api/events/${id}/feedback`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(feedbackData)
+        });
+    }
+
     // ---- CLUBS ----
     async getClubs() {
         return this.request('/api/clubs', {

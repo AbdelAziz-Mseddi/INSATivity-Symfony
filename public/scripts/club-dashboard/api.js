@@ -16,3 +16,30 @@ export async function uploadCoverImage(file, prefix) {
 export async function createEvent(payload) {
     return API.createEvent(payload);
 }
+
+export async function approveEvent(eventId) {
+    return API.request(`/api/events/${eventId}/approve`, {
+        method: 'PATCH',
+        headers: API.getHeaders()
+    });
+}
+
+export async function reviewEvent(eventId, payload) {
+    return API.request(`/api/events/${eventId}/review`, {
+        method: 'POST',
+        headers: API.getHeaders(),
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function submitEventFeedback(eventId, payload) {
+    return API.request(`/api/events/${eventId}/feedback`, {
+        method: 'POST',
+        headers: API.getHeaders(),
+        body: JSON.stringify(payload)
+    });
+}
+
+export async function deleteEvent(eventId) {
+    return API.deleteEvent(eventId);
+}

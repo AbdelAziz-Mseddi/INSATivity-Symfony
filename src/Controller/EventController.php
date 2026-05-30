@@ -43,8 +43,13 @@ class EventController extends ApiController
             } else {
                 $events = $this->eventRepository->findAllEventsOrdered();
             }
+
+            $reviewedEventIds = $this->getReviewedEventIds($events);
             
-            $data = array_map([$this, 'mapEventToArray'], $events);
+            $data = array_map(
+                fn (Event $event) => $this->mapEventToArray($event, in_array((int) $event->getId(), $reviewedEventIds, true)),
+                $events
+            );
             return $this->jsonSuccess($data);
         } catch (\Throwable $e) {
             return $this->jsonError($e->getMessage(), 'SERVER_ERROR', 500);
@@ -172,6 +177,104 @@ class EventController extends ApiController
         }
     }
 
+    #[Route('/{id}/review', name: 'api_event_review', methods: ['POST', 'OPTIONS'])]
+    public function review(int $id, Request $request): JsonResponse
+    {
+        if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
+
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
+        try {
+            $this->requireRole($request, ['admin']);
+
+            $event = $this->eventRepository->find($id);
+            if (!$event) return $this->jsonError('Event not found', 'NOT_FOUND', 404);
+
+            $payload = $this->getPayload($request);
+            $rating = isset($payload['rating']) ? (float) $payload['rating'] : null;
+            $attendance = isset($payload['attendance']) ? (int) $payload['attendance'] : null;
+
+            if ($rating === null || $attendance === null) {
+                return $this->jsonError('Missing review fields');
+            }
+
+            $now = new \DateTimeImmutable();
+            $connection = $this->entityManager->getConnection();
+            $connection->executeStatement(
+                'INSERT INTO event_reviews (event_id, review_rating, review_attendance, reviewed_at, created_at, updated_at)
+                 VALUES (:event_id, :review_rating, :review_attendance, :reviewed_at, :created_at, :updated_at)
+                 ON CONFLICT (event_id) DO UPDATE SET
+                    review_rating = EXCLUDED.review_rating,
+                    review_attendance = EXCLUDED.review_attendance,
+                    reviewed_at = EXCLUDED.reviewed_at,
+                    updated_at = EXCLUDED.updated_at',
+                [
+                    'event_id' => (int) $id,
+                    'review_rating' => $rating,
+                    'review_attendance' => $attendance,
+                    'reviewed_at' => $now->format('Y-m-d H:i:sP'),
+                    'created_at' => $now->format('Y-m-d H:i:sP'),
+                    'updated_at' => $now->format('Y-m-d H:i:sP'),
+                ]
+            );
+
+            return $this->jsonSuccess([
+                'eventId' => (int) $id,
+                'reviewRating' => $rating,
+                'reviewAttendance' => $attendance,
+                'reviewed' => true,
+            ], 200, 'Event review saved successfully');
+        } catch (\Throwable $e) {
+            $status = in_array($e->getCode(), [401, 403, 404], true) ? $e->getCode() : 500;
+            return $this->jsonError($e->getMessage(), 'SERVER_ERROR', $status);
+        }
+    }
+
+    #[Route('/{id}/feedback', name: 'api_event_feedback', methods: ['POST', 'OPTIONS'])]
+    public function feedback(int $id, Request $request): JsonResponse
+    {
+        if ($request->getMethod() === 'OPTIONS') return new JsonResponse(null, 200);
+
+        if ($csrfError = $this->verifyCsrf($request)) return $csrfError;
+
+        try {
+            $user = $this->requireRole($request, ['admin', 'student']);
+
+            $event = $this->eventRepository->find($id);
+            if (!$event) return $this->jsonError('Event not found', 'NOT_FOUND', 404);
+
+            $payload = $this->getPayload($request);
+            $rating = isset($payload['rating']) ? (float) $payload['rating'] : null;
+            $message = trim((string) ($payload['message'] ?? ''));
+
+            if ($rating === null) {
+                return $this->jsonError('Missing feedback rating');
+            }
+
+            $connection = $this->entityManager->getConnection();
+            $connection->executeStatement(
+                'INSERT INTO event_feedback (event_id, club_id, user_id, rating, message, created_at)
+                 VALUES (:event_id, :club_id, :user_id, :rating, :message, NOW())',
+                [
+                    'event_id' => (int) $id,
+                    'club_id' => $event->getClub() ? $event->getClub()->getId() : '',
+                    'user_id' => isset($user['id']) ? (int) $user['id'] : null,
+                    'rating' => $rating,
+                    'message' => $message,
+                ]
+            );
+
+            return $this->jsonSuccess([
+                'eventId' => (int) $id,
+                'rating' => $rating,
+                'message' => $message,
+            ], 201, 'Feedback submitted successfully');
+        } catch (\Throwable $e) {
+            $status = in_array($e->getCode(), [401, 403, 404], true) ? $e->getCode() : 500;
+            return $this->jsonError($e->getMessage(), 'SERVER_ERROR', $status);
+        }
+    }
+
     #[Route('/{id}', name: 'api_event_delete', methods: ['DELETE', 'OPTIONS'])]
     public function delete(int $id, Request $request): JsonResponse
     {
@@ -204,7 +307,26 @@ class EventController extends ApiController
             ->getOneOrNullResult();
     }
 
-    private function mapEventToArray(Event $event): array
+    private function getReviewedEventIds(array $events): array
+    {
+        $eventIds = array_values(array_filter(array_map(
+            static fn (Event $event) => (int) $event->getId(),
+            $events
+        )));
+
+        if (!$eventIds) {
+            return [];
+        }
+
+        $idList = implode(',', array_map('intval', $eventIds));
+        $rows = $this->entityManager->getConnection()->fetchFirstColumn(
+            "SELECT event_id FROM event_reviews WHERE event_id IN ($idList)"
+        );
+
+        return array_map('intval', $rows);
+    }
+
+    private function mapEventToArray(Event $event, bool $reviewed = false): array
     {
         return [
             'id' => (int)$event->getId(),
@@ -220,6 +342,7 @@ class EventController extends ApiController
             'maxParticipants' => $event->getMaxParticipants(),
             'featured' => $event->isFeatured(),
             'is_approved' => $event->isApproved(),
+            'reviewed' => $reviewed,
             'status' => $event->getStatus(),
         ];
     }

@@ -1,6 +1,8 @@
 import {
+  canManageClub,
   escapeHtml,
   formatEventDate,
+  getCurrentUser,
   getEventTheme,
   getRelativeDateLabel
 } from './utils.js';
@@ -10,6 +12,7 @@ export function getDashboardDom() {
     sidebar: document.querySelector('.sidebar'),
     panels: Array.from(document.querySelectorAll('[data-panel]')),
     createForm: document.querySelector('.event-create-form'),
+    feedbackForm: document.querySelector('.feedback-form'),
     profileNameEl: document.querySelector('.club-name'),
     profileDescriptionEl: document.querySelector('.club-description'),
     profileBannerEl: document.querySelector('.club-banner'),
@@ -54,6 +57,23 @@ export function bindSidebar(dom) {
   if (first?.dataset.target) {
     showPanel(dom, first.dataset.target);
   }
+}
+
+export function applyRoleVisibility(dom, club) {
+  const canManage = canManageClub(getCurrentUser(), club.id);
+
+  dom.sidebar?.querySelectorAll('.sidebar_link[data-role="admin"]').forEach(link => {
+    link.hidden = !canManage;
+  });
+
+  if (!canManage) {
+    const active = dom.sidebar?.querySelector('.sidebar_link.active');
+    if (active?.dataset.role === 'admin') {
+      showPanel(dom, 'profile');
+    }
+  }
+
+  return canManage;
 }
 // naamlou "resultat" lel form submission kenha mouch mawjouda, snn nbadlouha
 export function setFormStatus(dom, message, isError = false) {
@@ -272,7 +292,7 @@ export function renderDoneEvents(dom, club, finishedEvents) {
           </div>
           <div class="done-review">
             <h4 class="done-review-title">Complete event review</h4>
-            <form class="done-review-form">
+            <form class="done-review-form" data-event-id="${eventId}">
               <div class="done-form-row">
                 <div class="form-field">
                   <label class="form-label" for="done-rating-${eventId}">How well did it go? (0-5)</label>

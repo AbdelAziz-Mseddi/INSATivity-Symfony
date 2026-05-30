@@ -1,9 +1,13 @@
 // n importiw touskié hajetna bih
 // nidham saaahbi
 import {
+  approveEvent,
   createEvent,
+  deleteEvent,
   fetchAllEvents,
   fetchClubById,
+  reviewEvent,
+  submitEventFeedback,
   uploadCoverImage,
 } from "./club-dashboard/api.js";
 import {
@@ -15,6 +19,7 @@ import {
   getDashboardDom,
   renderClubProfile,
   renderDoneEvents,
+  applyRoleVisibility,
   renderFeedbackEventOptions,
   renderHistoryEvents,
   renderLoadError,
@@ -77,13 +82,32 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyClubDashboardContent(club, events) {
     const pendingEvents = events.filter(e => !e.is_approved);
     const approvedEvents = events.filter(e => e.is_approved);
-    const { upcomingEvents, finishedEvents } = splitEventsByDate(approvedEvents);
+    const { finishedEvents } = splitEventsByDate(approvedEvents);
+    const reviewedEvents = finishedEvents.filter((event) => event.reviewed);
+    const reviewQueueEvents = finishedEvents.filter((event) => !event.reviewed);
 
     renderClubProfile(dom, club, approvedEvents);
     renderPendingEvents(dom, club, pendingEvents);
-    renderHistoryEvents(dom, club, finishedEvents);
-    renderDoneEvents(dom, club, finishedEvents);
-    renderFeedbackEventOptions(dom, finishedEvents);
+    renderHistoryEvents(dom, club, reviewedEvents);
+    renderDoneEvents(dom, club, reviewQueueEvents);
+    renderFeedbackEventOptions(dom, reviewedEvents);
+    applyRoleVisibility(dom, club);
+  }
+
+  function setInlineFormStatus(form, message, isError = false) {
+    if (!form) return;
+
+    let status = form.querySelector('.form-status');
+    if (!status) {
+      status = document.createElement('p');
+      status.className = 'form-status';
+      status.style.marginTop = '12px';
+      status.style.fontSize = '14px';
+      form.appendChild(status);
+    }
+
+    status.textContent = message;
+    status.style.color = isError ? '#b42318' : '#027a48';
   }
   // the final boss
   // nestaamlou kol chy w naamrou l dashboard
@@ -174,24 +198,109 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  dom.feedbackForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const submitButton = form.querySelector('.feedback-submit');
+    const originalButtonText = submitButton?.textContent || 'Submit rating';
+
+    try {
+      const formData = new FormData(form);
+      const eventId = Number(formData.get('feedback-event') || 0);
+      const rating = Number(formData.get('feedback-rating'));
+      const message = String(formData.get('feedback-message') || '').trim();
+
+      if (!eventId) {
+        throw new Error('Please choose an event.');
+      }
+      if (Number.isNaN(rating)) {
+        throw new Error('Please add a valid rating.');
+      }
+
+      setInlineFormStatus(form, 'Submitting feedback...');
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+      }
+
+      await submitEventFeedback(eventId, { rating, message });
+      form.reset();
+      setInlineFormStatus(form, 'Feedback submitted successfully.');
+      await loadDashboardData();
+    } catch (error) {
+      setInlineFormStatus(form, error.message || 'Unable to submit feedback.', true);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+
+  dom.doneList?.addEventListener('submit', async (event) => {
+    const form = event.target.closest('.done-review-form');
+    if (!form) return;
+
+    event.preventDefault();
+
+    const submitButton = form.querySelector('.done-submit');
+    const originalButtonText = submitButton?.textContent || 'Move to history';
+
+    try {
+      const formData = new FormData(form);
+      const eventId = Number(form.dataset.eventId || formData.get('event-id') || 0);
+      const rating = Number(formData.get('done-rating'));
+      const attendance = Number(formData.get('done-attendance'));
+
+      if (!eventId) {
+        throw new Error('Missing event reference.');
+      }
+      if (Number.isNaN(rating) || Number.isNaN(attendance)) {
+        throw new Error('Please fill the review fields.');
+      }
+
+      setInlineFormStatus(form, 'Saving review...');
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving...';
+      }
+
+      await reviewEvent(eventId, { rating, attendance });
+      setInlineFormStatus(form, 'Event review saved successfully.');
+      await loadDashboardData();
+    } catch (error) {
+      setInlineFormStatus(form, error.message || 'Unable to save review.', true);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = originalButtonText;
+      }
+    }
+  });
+
   // Admin Actions for Pending Events
   dom.pendingList?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('approve-btn')) {
-      const id = e.target.dataset.id;
+    if (e.target.closest('.approve-btn')) {
+      const button = e.target.closest('.approve-btn');
+      const id = button?.dataset.id;
+      if (!id) return;
       try {
-        const { API } = await import('./api.js');
-        await API.request(`/events.php?action=approve&id=${id}`, { method: 'PATCH', headers: API.getHeaders() });
+        await approveEvent(id);
         await loadDashboardData();
       } catch (err) {
         alert(err.message || 'Failed to approve event');
       }
     }
-    if (e.target.classList.contains('reject-btn')) {
-      const id = e.target.dataset.id;
+    if (e.target.closest('.reject-btn')) {
+      const button = e.target.closest('.reject-btn');
+      const id = button?.dataset.id;
+      if (!id) return;
       if (confirm('Are you sure you want to reject and delete this event?')) {
         try {
-          const { API } = await import('./api.js');
-          await API.deleteEvent(id);
+          await deleteEvent(id);
           await loadDashboardData();
         } catch (err) {
           alert(err.message || 'Failed to reject event');
